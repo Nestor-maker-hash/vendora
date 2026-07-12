@@ -4,9 +4,12 @@ import Link from "next/link";
 import AuthGuard from "@/src/components/AuthGuard";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import { useProducts } from "@/src/features/products/hooks/useProducts";
+import ProductCard from "@/src/features/products/components/ProductCard";
+import { useRouter } from "next/navigation";
 
 export default function ProductsPage() {
   const { products, loading, error } = useProducts();
+  const router = useRouter();
 
   return (
     <AuthGuard>
@@ -42,52 +45,18 @@ export default function ProductsPage() {
               </Link>
             </div>
           )}
-
-          {!loading && products.length > 0 && (
-            <div className="mt-6 overflow-x-auto rounded-xl bg-white shadow">
-              <table className="min-w-full">
-                <thead>
-                <tr className="border-b">
-		  <th className="p-4 text-left">Image</th>
-		  <th className="p-4 text-left">Name</th>
-		  <th className="p-4 text-left">Price</th>
-		  <th className="p-4 text-left">Stock</th>
-		  <th className="p-4 text-left">Actions</th>
-		</tr>
-                </thead>
-
-                <tbody>
-                  {products.map((product) => (
-		<tr key={product.id} className="border-b">
-  <td className="p-4">
-    {product.image_url ? (
-      <img
-        src={product.image_url}
-        alt={product.name}
-        className="h-16 w-16 rounded-lg object-cover"
+{!loading && products.length > 0 && (
+  <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {products.map((product) => (
+      <ProductCard
+        key={product.id}
+        product={product}
+	onEdit={() => router.push(`/products/${product.id}/edit`)}
+        onDelete={() => console.log("Delete", product.id)}
       />
-    ) : (
-      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-gray-100 text-xs text-gray-500">
-        No Image
-      </div>
-    )}
-  </td>
-
-  <td className="p-4">{product.name}</td>
-  <td className="p-4">₦{product.price}</td>
-  <td className="p-4">{product.stock}</td>
-
-  <td className="p-4">
-    <button className="rounded bg-gray-100 px-3 py-1 text-sm hover:bg-gray-200">
-      Edit
-    </button>
-  </td>
-</tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+    ))}
+  </div>
+)}
         </div>
       </DashboardLayout>
     </AuthGuard>
