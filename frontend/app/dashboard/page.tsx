@@ -1,8 +1,11 @@
+import AuthGuard from "@/src/components/AuthGuard";
+import RecentOrders from "@/src/components/dashboard/RecentOrders";
 import StatCard from "@/src/components/dashboard/StatCard";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 
 export default function DashboardPage() {
   return (
+	 <AuthGuard>
     <DashboardLayout>
       <h1 className="text-3xl font-bold">
         Dashboard
@@ -18,6 +21,8 @@ export default function DashboardPage() {
   <StatCard title="Customers" value="0" />
   <StatCard title="Products" value="0" />
 </div>
+<RecentOrders />
     </DashboardLayout>
+	  </AuthGuard>
   );
 }
