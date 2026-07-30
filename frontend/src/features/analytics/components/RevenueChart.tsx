@@ -53,7 +53,7 @@ export default function RevenueChart({
             <YAxis />
 
             <Tooltip
-             formatter={(value: number) => [
+             formatter={(value: unknown) => [
   formatCurrency(Number(value), currency),
   "Revenue",
 ]}
