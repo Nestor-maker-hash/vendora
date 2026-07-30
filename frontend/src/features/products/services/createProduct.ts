@@ -1,4 +1,5 @@
 import { supabase } from "@/src/lib/supabase";
+import { Product } from "../types/product";
 
 interface CreateProductInput {
   name: string;
@@ -10,7 +11,7 @@ interface CreateProductInput {
 
 export async function createProduct(
   input: CreateProductInput
-) {
+): Promise<Product> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -47,5 +48,5 @@ export async function createProduct(
     throw error;
   }
 
-  return data;
+  return data as Product;
 }

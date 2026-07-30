@@ -1,10 +1,12 @@
 import { supabase } from "@/src/lib/supabase";
 
-export async function getProduct(id: string) {
+export async function getNotificationSettings(
+  businessId: string
+) {
   const { data, error } = await supabase
-    .from("products")
+    .from("notification_settings")
     .select("*")
-    .eq("id", id)
+    .eq("business_id", businessId)
     .single();
 
   if (error) throw error;

@@ -2,13 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
 import { supabase } from "@/src/lib/supabase";
+import { getBusinessAfterLogin } from "@/src/features/auth/services/getBusinessAfterLogin";
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
-export default function AuthGuard({ children }: AuthGuardProps) {
+export default function AuthGuard({
+  children,
+}: AuthGuardProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
 
@@ -18,8 +22,28 @@ export default function AuthGuard({ children }: AuthGuardProps) {
         data: { session },
       } = await supabase.auth.getSession();
 
+      // Not logged in
       if (!session) {
         router.replace("/login");
+        return;
+      }
+
+      // Check if merchant has a business
+      const business = await getBusinessAfterLogin(
+        session.user.id
+      );
+
+      const currentPath = window.location.pathname;
+
+      // Logged in but hasn't completed onboarding
+      if (!business && currentPath !== "/onboarding") {
+        router.replace("/onboarding");
+        return;
+      }
+
+      // Already has a business but somehow visits onboarding
+      if (business && currentPath === "/onboarding") {
+        router.replace("/dashboard");
         return;
       }
 
@@ -31,8 +55,16 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold text-emerald-600">
+            Vendora
+          </h1>
+
+          <p className="mt-3 text-gray-500">
+            Loading your workspace...
+          </p>
+        </div>
       </div>
     );
   }

@@ -2,6 +2,8 @@ import AuthGuard from "@/src/components/AuthGuard";
 import RecentOrders from "@/src/components/dashboard/RecentOrders";
 import StatCard from "@/src/components/dashboard/StatCard";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
+import StoreLinkCard from "@/src/features/business/components/StoreLinkCard";
+import DashboardStats from "@/src/components/dashboard/DashboardStats";
 
 export default function DashboardPage() {
   return (
@@ -15,12 +17,9 @@ export default function DashboardPage() {
         Welcome to Vendora.
       </p>
 
-      <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
-  <StatCard title="Revenue" value="₦0" />
-  <StatCard title="Orders" value="0" />
-  <StatCard title="Customers" value="0" />
-  <StatCard title="Products" value="0" />
-</div>
+<DashboardStats />
+
+<StoreLinkCard />
 <RecentOrders />
     </DashboardLayout>
 	  </AuthGuard>

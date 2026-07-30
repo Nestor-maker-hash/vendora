@@ -6,10 +6,47 @@ import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import { useProducts } from "@/src/features/products/hooks/useProducts";
 import ProductCard from "@/src/features/products/components/ProductCard";
 import { useRouter } from "next/navigation";
+import { useDeleteProduct } from "@/src/features/products/hooks/useDeleteProduct";
+import { useBusiness } from "@/src/features/business/hooks/useBusiness";
 
 export default function ProductsPage() {
-  const { products, loading, error } = useProducts();
+ const {
+  products,
+  loading,
+  error,
+  refetch,
+  setProducts,
+} = useProducts();
+
   const router = useRouter();
+  const { removeProduct } = useDeleteProduct();
+const { currency } = useBusiness();
+
+async function handleDelete(id: string) {
+  const confirmed = window.confirm(
+    "Are you sure you want to delete this product?"
+  );
+
+  if (!confirmed) return;
+
+  // Save current list in case we need to restore it
+  const previousProducts = [...products];
+
+  // Remove immediately from the UI
+  setProducts((current) =>
+    current.filter((product) => product.id !== id)
+  );
+
+  try {
+    await removeProduct(id);
+  } catch (error) {
+    // Restore the previous list if deletion fails
+    setProducts(previousProducts);
+
+    console.error(error);
+    alert("Failed to delete product.");
+  }
+}
 
   return (
     <AuthGuard>
@@ -49,11 +86,12 @@ export default function ProductsPage() {
   <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
     {products.map((product) => (
       <ProductCard
-        key={product.id}
-        product={product}
-	onEdit={() => router.push(`/products/${product.id}/edit`)}
-        onDelete={() => console.log("Delete", product.id)}
-      />
+  key={product.id}
+  product={product}
+  currency={currency}
+  onEdit={() => router.push(`/products/${product.id}/edit`)}
+  onDelete={() => handleDelete(product.id)}
+/>
     ))}
   </div>
 )}

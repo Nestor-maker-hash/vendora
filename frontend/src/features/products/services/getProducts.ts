@@ -1,24 +1,9 @@
 import { supabase } from "@/src/lib/supabase";
 import { Product } from "../types/product";
+import { getCurrentBusiness } from "@/src/features/business/services/getCurrentBusiness";
 
 export async function getProducts(): Promise<Product[]> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    throw new Error("User not authenticated");
-  }
-
-  const { data: business, error: businessError } = await supabase
-    .from("businesses")
-    .select("id")
-    .eq("owner_id", user.id)
-    .single();
-
-  if (businessError || !business) {
-    throw new Error("Business not found");
-  }
+  const business = await getCurrentBusiness();
 
   const { data: products, error } = await supabase
     .from("products")
@@ -32,5 +17,5 @@ export async function getProducts(): Promise<Product[]> {
     throw error;
   }
 
-  return products ?? [];
+  return (products ?? []) as Product[];
 }

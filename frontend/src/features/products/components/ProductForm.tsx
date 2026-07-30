@@ -4,46 +4,77 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateProduct } from "../hooks/useCreateProduct";
 import { uploadProductImage } from "../services/uploadProductImage";
+import { updateProduct } from "../services/updateProduct";
 import Button from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
 
-export default function ProductForm() {
-  const router = useRouter();
-  const { addProduct, loading } = useCreateProduct();
+// Step 1: Component Interface Definition
+interface ProductFormProps {
+  initialValues?: {
+    name: string;
+    description?: string | null;
+    price: number;
+    stock: number;
+    image_url?: string | null;
+  };
+  productId?: string;
+}
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("");
+export default function ProductForm({ initialValues, productId }: ProductFormProps) {
+  const router = useRouter();
+  const { addProduct, loading: creating } = useCreateProduct();
+  const [updating, setUpdating] = useState(false);
+
+  // Step 2: Initialize State from Props
+  const [name, setName] = useState(initialValues?.name ?? "");
+  const [description, setDescription] = useState(initialValues?.description ?? "");
+  const [price, setPrice] = useState(initialValues ? String(initialValues.price) : "");
+  const [stock, setStock] = useState(initialValues ? String(initialValues.stock) : "");
+  
   const [image, setImage] = useState<File | null>(null);
+  const [imageUrl, setImageUrl] = useState(initialValues?.image_url ?? "");
+
+  const isSubmitting = creating || updating;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (productId) setUpdating(true);
 
     try {
-      let imageUrl: string | undefined;
+      // Step 3: Check for new image uploads first
+      let activeImageUrl = imageUrl;
 
       if (image) {
-        imageUrl = await uploadProductImage(image);
+        const uploadedUrl = await uploadProductImage(image);
+        setImageUrl(uploadedUrl);
+        activeImageUrl = uploadedUrl;
       }
 
-      await addProduct({
+      const payload = {
         name,
         description,
         price: Number(price),
         stock: Number(stock),
-        image_url: imageUrl,
-      });
+        image_url: activeImageUrl,
+      };
+
+      // Direct submission path depending on presence of a productId
+      if (productId) {
+        await updateProduct(productId, payload);
+      } else {
+        await addProduct(payload);
+      }
 
       router.push("/products");
     } catch (error) {
       console.error(error);
-
       if (error instanceof Error) {
         alert(error.message);
       } else {
         alert(JSON.stringify(error));
       }
+    } finally {
+      if (productId) setUpdating(false);
     }
   }
 
@@ -60,6 +91,7 @@ export default function ProductForm() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Black Hoodie"
+          className="w-full rounded-lg border p-3"
           required
         />
       </div>
@@ -85,6 +117,7 @@ export default function ProductForm() {
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           placeholder="₦5000"
+          className="w-full rounded-lg border p-3"
           required
         />
       </div>
@@ -98,6 +131,7 @@ export default function ProductForm() {
           value={stock}
           onChange={(e) => setStock(e.target.value)}
           placeholder="20"
+          className="w-full rounded-lg border p-3"
           required
         />
       </div>
@@ -106,6 +140,11 @@ export default function ProductForm() {
         <label className="mb-2 block text-sm font-medium">
           Product Image
         </label>
+        {imageUrl && !image && (
+          <div className="mb-2 text-xs text-gray-500">
+            Current image saved. Choose a new file to change it.
+          </div>
+        )}
         <Input
           type="file"
           accept="image/*"
@@ -115,10 +154,13 @@ export default function ProductForm() {
 
       <Button
         type="submit"
-        disabled={loading}
+        disabled={isSubmitting}
         className="w-full py-3"
       >
-        {loading ? "Creating..." : "Create Product"}
+        {isSubmitting 
+          ? (productId ? "Saving..." : "Creating...") 
+          : (productId ? "Save Changes" : "Create Product")
+        }
       </Button>
     </form>
   );
