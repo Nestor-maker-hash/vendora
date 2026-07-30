@@ -2,16 +2,7 @@
 
 import { useMemo } from "react";
 import ProductCard from "@/src/features/products/components/ProductCard";
-
-interface Product {
-  id: string;
-  name: string;
-  description?: string;
-  price: number;
-  stock: number;
-  image_url?: string;
- 
-}
+import type { Product } from "@/src/features/products/types/product";
 
 interface Props {
   slug: string;
