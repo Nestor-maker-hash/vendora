@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useCart } from "@/src/features/cart/context/CartContext";
@@ -27,6 +27,22 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [business, setBusiness] = useState<any>(null);
+
+  useEffect(() => {
+    if (!storeSlug) return;
+
+    async function loadBusiness() {
+      try {
+        const data = await getBusinessBySlug(storeSlug);
+        setBusiness(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    loadBusiness();
+  }, [storeSlug]);
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -58,46 +74,40 @@ export default function CheckoutPage() {
         items,
       });
 
-     const order = await createOrder({
-  businessId: items[0].business_id,
-  customerName,
-  customerPhone,
-  customerEmail,
-  state,
-  city,
-  address,
-  notes,
-  deliveryFee,
-  items,
-});
+      const order = await createOrder({
+        businessId: items[0].business_id,
+        customerName,
+        customerPhone,
+        customerEmail,
+        state,
+        city,
+        address,
+        notes,
+        deliveryFee,
+        items,
+      });
 
-const business = await getBusinessBySlug(storeSlug);
+      if (business?.phone) {
+        const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders/${order.id}`;
 
-if (business.phone) {
-  const dashboardUrl =
-  `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders/${order.id}`;
-
-const message =
-`🛒 Vendora
+        const message = `🛒 Vendora
 
 ‼️ New order from ${customerName}
 
 View Order:
 ${dashboardUrl}`;
 
-  window.open(
-    `https://wa.me/${business.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`,
-    "_blank"
-  );
-}
+        window.open(
+          `https://wa.me/${business.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`,
+          "_blank"
+        );
+      }
 
-const slug = storeSlug;
+      const slug = storeSlug;
 
-clearCart();
+      clearCart();
 
-router.push(`/order-success?store=${slug}`);
-
-
+      router.push(`/order-success?store=${slug}`);
     } catch (error) {
       console.error(error);
 
@@ -114,6 +124,7 @@ router.push(`/order-success?store=${slug}`);
   return (
     <>
       <StoreNavbar
+        business={business}
         storeName="Checkout"
         storeHref={storeSlug ? `/store/${storeSlug}` : "/"}
       />
@@ -163,7 +174,6 @@ router.push(`/order-success?store=${slug}`);
                 <h2 className="mb-4 text-lg font-semibold">
                   Delivery Address
                 </h2>
-
                 <div className="grid gap-4">
 
                   <input
@@ -216,14 +226,13 @@ router.push(`/order-success?store=${slug}`);
                     <p className="font-medium">
                       {item.name}
                     </p>
-
                     <p className="text-sm text-gray-500">
                       Qty {item.quantity}
                     </p>
                   </div>
 
                   <p className="font-medium">
-                   {formatCurrency(item.price * item.quantity, currency)}
+                    {formatCurrency(item.price * item.quantity, currency)}
                   </p>
                 </div>
               ))}
@@ -237,14 +246,14 @@ router.push(`/order-success?store=${slug}`);
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span>
-		{formatCurrency(subtotal, currency)}
+                  {formatCurrency(subtotal, currency)}
                 </span>
               </div>
 
               <div className="flex justify-between">
                 <span>Delivery</span>
                 <span>
-		{formatCurrency(deliveryFee, currency)}
+                  {formatCurrency(deliveryFee, currency)}
                 </span>
               </div>
 
@@ -252,7 +261,7 @@ router.push(`/order-success?store=${slug}`);
                 <span>Total</span>
 
                 <span className="text-emerald-600">
-		{formatCurrency(total, currency)}
+                  {formatCurrency(total, currency)}
                 </span>
               </div>
 
