@@ -34,7 +34,7 @@ export default function CheckoutPage() {
 
     async function loadBusiness() {
       try {
-        const data = await getBusinessBySlug(storeSlug);
+        const data = await getBusinessBySlug(storeSlug!);
         setBusiness(data);
       } catch (error) {
         console.error(error);
