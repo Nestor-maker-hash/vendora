@@ -31,6 +31,7 @@ export default async function ProductPage({
 return (
 <>
 <StoreNavbar
+  business={business}
   storeName={slug}
   storeHref={`/store/${slug}`}
 />
