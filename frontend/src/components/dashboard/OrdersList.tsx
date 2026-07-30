@@ -4,22 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import OrderStatusBadge from "./OrderStatusBadge";
 import { formatCurrency } from "@/src/utils/formatCurrency";
-
-interface Order {
-  id: string;
-  customer_name: string;
-  customer_phone: string;
-  address: string;
-  city: string;
-  state: string;
-  total: number;
-  status: string;
-  created_at: string;
-  business: {
-    currency: string;
-  };
-}
-
+import { Order } from "@/src/features/orders/types/order";
 interface Props {
   orders: Order[];
 }
