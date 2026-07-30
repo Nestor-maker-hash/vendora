@@ -6,7 +6,7 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
-xport interface Order {
+export interface Order {
   id: string;
   business_id: string;
 
