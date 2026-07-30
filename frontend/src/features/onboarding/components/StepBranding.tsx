@@ -27,8 +27,7 @@ export default function StepBranding({
 
     if (!file) return;
 
-    const url =
-      await uploadBusinessImage(file);
+const url = await uploadBusinessImage(file, "logos");
 
     update({
       logo_url: url,
@@ -42,8 +41,7 @@ export default function StepBranding({
 
     if (!file) return;
 
-    const url =
-      await uploadBusinessImage(file);
+const url = await uploadBusinessImage(file, "banners");
 
     update({
       banner_url: url,
