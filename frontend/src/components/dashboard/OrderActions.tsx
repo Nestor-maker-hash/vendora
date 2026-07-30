@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { updateOrderStatus } from "@/src/features/orders/services/updateOrderStatus";
+import type { OrderStatus } from "@/src/features/orders/types/order";
 
 interface Props {
   orderId: string;
@@ -16,7 +17,7 @@ export default function OrderActions({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  async function changeStatus(nextStatus: string) {
+async function changeStatus(nextStatus: OrderStatus) {
     setLoading(true);
 
     try {
