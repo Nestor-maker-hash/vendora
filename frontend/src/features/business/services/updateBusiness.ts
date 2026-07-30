@@ -7,6 +7,7 @@ interface UpdateBusinessData {
   slug: string;
   
   phone?: string;
+  currency?: string;
 
   description?: string;
 
