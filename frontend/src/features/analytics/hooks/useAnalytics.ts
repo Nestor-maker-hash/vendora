@@ -14,7 +14,10 @@ const [analytics, setAnalytics] = useState({
   pendingOrders: 0,
   averageOrderValue: 0,
   lowStockProducts: 0,
-  revenueHistory: [],
+  revenueHistory: [] as {
+  date: string;
+  revenue: number;
+}[],
   topProducts: [] as {
     name: string;
     quantity: number;
