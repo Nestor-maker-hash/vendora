@@ -22,12 +22,8 @@ export function formatCurrency(
     return `${symbol}${format(value / 1_000_000_000)}B`;
   }
 
-  if (value >= 1_000_000) {
+  if (value >= 10_000_000) {
     return `${symbol}${format(value / 1_000_000)}M`;
-  }
-
-  if (value >= 1_000) {
-    return `${symbol}${format(value / 1_000)}K`;
   }
 
   return `${symbol}${value.toLocaleString()}`;

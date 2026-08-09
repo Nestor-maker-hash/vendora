@@ -50,10 +50,10 @@ export default function Toast({
         </Link>
 
 	<Link
-  href={continueHref}
+  href="/checkout"
   className="rounded-xl border px-5 py-3 text-center font-medium text-gray-700 transition hover:bg-gray-100"
 >
-  Continue Shopping
+  Proceed to checkout
 </Link>
       </div>
     </div>

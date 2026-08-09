@@ -1,22 +1,27 @@
 import { Order } from "@/src/features/orders/types/order";
-import { createNotification } from "./createNotification";
-import { formatCurrency } from "@/src/utils/formatCurrency";
+import { dispatchNotificationServer } from "@/src/services/serverNotificationDispatcher";
+import { newOrderTemplate } from "../templates/newOrder";
+import { NotificationType } from "@/src/features/notifications/constants/notificationTypes";
 
 export async function notifyMerchant(
   order: Order,
   currency: string
 ) {
-  await createNotification({
+  const notification = newOrderTemplate(
+    order,
+    currency
+  );
+
+  await dispatchNotificationServer({
     businessId: order.business_id,
 
-    title: "🛒 New Order",
+    title: notification.title,
 
-   message: `${order.customer_name} placed an order worth ${formatCurrency(
-  Number(order.total),
-  currency
-)}`,
-
-    type: "new_order",
+    message: notification.message,
+    
+    whatsapp: notification.whatsapp,
+    
+    type: NotificationType.NEW_ORDER,
 
     link: `/dashboard/orders/${order.id}`,
   });

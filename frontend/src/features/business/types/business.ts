@@ -11,6 +11,19 @@ export interface Business {
   email: string | null;
   currency: string;
 
+pay_on_delivery_enabled: boolean;
+
+bank_transfer_enabled: boolean;
+
+online_payment_enabled: boolean;
+
+bank_name: string | null;
+
+account_name: string | null;
+
+account_number: string | null;
+
+
   description: string | null;
 
   address: string | null;

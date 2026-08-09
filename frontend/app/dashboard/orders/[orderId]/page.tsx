@@ -4,6 +4,7 @@ import { getOrderById } from "@/src/features/orders/services/getOrderById";
 import OrderActions from "@/src/components/dashboard/OrderActions";
 import { OrderItem } from "@/src/features/orders/types/orderItem";
 import { formatCurrency } from "@/src/utils/formatCurrency";
+import PaymentVerification from "@/src/features/orders/components/PaymentVerification";
 
 interface Props {
   params: Promise<{
@@ -160,6 +161,7 @@ const order = await getOrderById(orderId);
             </div>
 
           </div>
+<PaymentVerification order={order} />
 	   <div className="rounded-2xl border bg-white p-6 shadow-sm">
   <h2 className="mb-4 text-xl font-semibold">
     Order Actions

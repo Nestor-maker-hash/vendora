@@ -30,7 +30,10 @@ export async function createOrUpdateBusiness(
 
     if (error) throw error;
 
-    return existingBusiness.id;
+return {
+  businessId: existingBusiness.id,
+  created: false,
+};
   }
 
   const { data: newBusiness, error } =
@@ -45,5 +48,8 @@ export async function createOrUpdateBusiness(
 
   if (error) throw error;
 
-  return newBusiness.id;
+return {
+  businessId: newBusiness.id,
+  created: true,
+};
 }

@@ -7,17 +7,28 @@ export async function getOrderById(
 ): Promise<
   Order & {
     order_items: OrderItem[];
-    business: {
-      currency: string;
-    };
+business: {
+  currency: string;
+
+  bank_name: string | null;
+
+  account_name: string | null;
+
+  account_number: string | null;
+};
+
   }
 > {
   const { data: order, error } = await supabase
     .from("orders")
     .select(`
   *,
-  business:businesses(
-    currency
+business:businesses(
+  currency,
+  bank_name,
+  account_name,
+  account_number
+
   )
 `)
     .eq("id", id)
@@ -33,7 +44,13 @@ export async function getOrderById(
   if (itemsError) throw itemsError;
 
   return {
-    ...(order as Order),
-    order_items: (orderItems ?? []) as OrderItem[],
-  };
+  ...(order as Order),
+  business: order.business as {
+    currency: string;
+    bank_name: string | null;
+    account_name: string | null;
+    account_number: string | null;
+  },
+  order_items: (orderItems ?? []) as OrderItem[],
+};
 }

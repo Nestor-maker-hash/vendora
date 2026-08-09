@@ -1,11 +1,14 @@
 import { supabase } from "@/src/lib/supabase";
 import { CartItem } from "@/src/features/cart/types/cart";
-import { Order } from "../types/order";
 import { OrderItem } from "../types/orderItem";
 import { notifyMerchant } from "@/src/features/notifications/services/notifyMerchant";
-import { updateProductStock } from "@/src/features/products/services/updateProductStock";
 import { getProductById } from "@/src/features/products/services/getProductById";
-import { getCurrentBusiness } from "@/src/features/business/services/getCurrentBusiness";
+import { getBusinessById } from "@/src/features/business/services/getBusinessById";
+import { updateProductStock } from "@/src/features/products/services/updateProductStock";
+import {
+  Order,
+  PaymentMethod,
+} from "../types/order";
 
 interface CheckoutData {
   businessId: string;
@@ -22,6 +25,7 @@ interface CheckoutData {
   deliveryFee: number;
 
   items: CartItem[];
+  paymentMethod: PaymentMethod;
 }
 
 export async function createOrder(
@@ -62,8 +66,15 @@ for (const item of data.items) {
       subtotal,
       delivery_fee: data.deliveryFee,
       total,
+    payment_method: data.paymentMethod,
+    
+status: "pending",
 
-      status: "pending",
+payment_status: "pending",
+
+payment_reference: null,
+
+paid_at: null,
     })
     .select()
     .single();
@@ -86,17 +97,27 @@ for (const item of data.items) {
     .insert(orderItems);
 
   if (itemsError) throw itemsError;
-	for (const item of data.items) {
+for (const item of data.items) {
   await updateProductStock(
     item.id,
     -item.quantity
   );
 }
-const business = await getCurrentBusiness();
-
-await notifyMerchant(
-  order as Order,
-  business.currency
+const business = await getBusinessById(
+  data.businessId
 );
+
+try {
+  await notifyMerchant(
+    order as Order,
+    business.currency
+  );
+} catch (err) {
+  console.error(
+    "Merchant notification failed:",
+    err
+  );
+}
+
 return order as Order;
 }

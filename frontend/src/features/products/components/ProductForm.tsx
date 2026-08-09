@@ -7,6 +7,7 @@ import { uploadProductImage } from "../services/uploadProductImage";
 import { updateProduct } from "../services/updateProduct";
 import Button from "@/src/components/ui/Button";
 import Input from "@/src/components/ui/Input";
+import toast from "react-hot-toast";
 
 // Step 1: Component Interface Definition
 interface ProductFormProps {
@@ -69,10 +70,10 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
     } catch (error) {
       console.error(error);
       if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert(JSON.stringify(error));
-      }
+  toast.error(error.message || "Unable to save product.");
+} else {
+  toast.error("Unable to save product. Please try again.");
+}
     } finally {
       if (productId) setUpdating(false);
     }

@@ -1,3 +1,14 @@
+export type PaymentMethod =
+  | "paystack"
+  | "bank_transfer"
+  | "pay_on_delivery";
+
+export type PaymentStatus =
+  | "pending"
+  | "paid"
+  | "failed"
+  | "refunded";
+
 export type OrderStatus =
   | "pending"
   | "confirmed"
@@ -30,4 +41,12 @@ export interface Order {
   business: {
     currency: string;
   };
+payment_method: PaymentMethod;
+
+payment_status: PaymentStatus;
+
+payment_reference: string | null;
+
+paid_at: string | null;
+payment_submitted_at: string | null;
 }

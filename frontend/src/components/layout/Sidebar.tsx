@@ -36,6 +36,11 @@ const links = [
     href: "/dashboard/orders",
     icon: ShoppingCart,
   },
+{
+  name: "Payments",
+  href: "/payments",
+  icon: CreditCard,
+},
   {
     name: "Notifications",
     href: "/dashboard/notifications",

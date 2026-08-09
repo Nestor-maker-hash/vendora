@@ -5,9 +5,10 @@ import { useRouter } from "next/navigation";
 
 import { useCart } from "@/src/features/cart/context/CartContext";
 import StoreNavbar from "@/src/components/store/StoreNavbar";
-import { createOrder } from "@/src/features/orders/services/createOrder";
 import { getBusinessBySlug } from "@/src/features/business/services/getBusinessBySlug";
 import { formatCurrency } from "@/src/utils/formatCurrency";
+import { PaymentMethod } from "@/src/features/orders/types/order";
+import { Business } from "@/src/features/business/types/business";
 
 export default function CheckoutPage() {
   const {
@@ -26,8 +27,9 @@ export default function CheckoutPage() {
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pay_on_delivery");
   const [loading, setLoading] = useState(false);
-  const [business, setBusiness] = useState<any>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
 
   useEffect(() => {
     if (!storeSlug) return;
@@ -43,6 +45,24 @@ export default function CheckoutPage() {
 
     loadBusiness();
   }, [storeSlug]);
+
+  useEffect(() => {
+    if (!business) return;
+
+    if (business.pay_on_delivery_enabled) {
+      setPaymentMethod("pay_on_delivery");
+      return;
+    }
+
+    if (business.bank_transfer_enabled) {
+      setPaymentMethod("bank_transfer");
+      return;
+    }
+
+    if (business.online_payment_enabled) {
+      setPaymentMethod("paystack");
+    }
+  }, [business]);
 
   const subtotal = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -74,40 +94,52 @@ export default function CheckoutPage() {
         items,
       });
 
-      const order = await createOrder({
-        businessId: items[0].business_id,
-        customerName,
-        customerPhone,
-        customerEmail,
-        state,
-        city,
-        address,
-        notes,
-        deliveryFee,
-        items,
-      });
+const response = await fetch("/api/orders", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    businessId: items[0].business_id,
+    customerName,
+    customerPhone,
+    customerEmail,
+    state,
+    city,
+    address,
+    notes,
+    deliveryFee,
+    paymentMethod,
+    items,
+  }),
+});
 
-      if (business?.phone) {
-        const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/orders/${order.id}`;
+const result = await response.json();
 
-        const message = `🛒 Vendora
+if (!response.ok || !result.success) {
+  throw new Error(
+    result.message ?? "Failed to create order."
+  );
+}
 
-‼️ New order from ${customerName}
-
-View Order:
-${dashboardUrl}`;
-
-        window.open(
-          `https://wa.me/${business.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`,
-          "_blank"
-        );
-      }
+const order = result.order;
 
       const slug = storeSlug;
 
       clearCart();
 
-      router.push(`/order-success?store=${slug}`);
+      if (paymentMethod === "pay_on_delivery") {
+        router.push(`/order-success?store=${slug}`);
+        return;
+      }
+
+      if (paymentMethod === "bank_transfer") {
+        router.push(`/payment/bank-transfer?order=${order.id}`);
+        return;
+      }
+
+      router.push(`/payment/paystack?order=${order.id}`);
+
     } catch (error) {
       console.error(error);
 
@@ -121,13 +153,22 @@ ${dashboardUrl}`;
     }
   }
 
+  const buttonText =
+    paymentMethod === "pay_on_delivery"
+      ? "Place Order"
+      : paymentMethod === "bank_transfer"
+      ? "Continue to Bank Transfer"
+      : "Continue to Online Payment";
+
   return (
     <>
-      <StoreNavbar
-        business={business}
-        storeName="Checkout"
-        storeHref={storeSlug ? `/store/${storeSlug}` : "/"}
-      />
+     {business && (
+  <StoreNavbar
+    business={business}
+    storeName="Checkout"
+    storeHref={storeSlug ? `/store/${storeSlug}` : "/"}
+  />
+)}
 
       <main className="min-h-screen bg-gray-50 py-8">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-3">
@@ -191,7 +232,7 @@ ${dashboardUrl}`;
                   <input
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="Street Address"
+                    placeholder="pick up address"
                     className="rounded-xl border p-3 outline-none focus:border-emerald-600"
                   />
                   <textarea
@@ -201,6 +242,64 @@ ${dashboardUrl}`;
                     placeholder="Order Notes (Optional)"
                     className="rounded-xl border p-3 outline-none focus:border-emerald-600"
                   />
+                </div>
+              </div>
+
+              <div>
+                <h2 className="mb-4 text-lg font-semibold">
+                  Payment Method
+                </h2>
+
+                <div className="space-y-3">
+
+                  {business?.pay_on_delivery_enabled && (
+                    <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={paymentMethod === "pay_on_delivery"}
+                        onChange={() => setPaymentMethod("pay_on_delivery")}
+                      />
+                      <div>
+                        <p className="font-medium">Pay on Delivery</p>
+                        <p className="text-sm text-gray-500">
+                          Pay when your order arrives.
+                        </p>
+                      </div>
+                    </label>
+                  )}
+
+                  {business?.bank_transfer_enabled && (
+                    <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={paymentMethod === "bank_transfer"}
+                        onChange={() => setPaymentMethod("bank_transfer")}
+                      />
+                      <div>
+                        <p className="font-medium">Bank Transfer</p>
+                        <p className="text-sm text-gray-500">
+                          Transfer directly to the merchant.
+                        </p>
+                      </div>
+                    </label>
+                  )}
+
+                  {business?.online_payment_enabled && (
+                    <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer">
+                      <input
+                        type="radio"
+                        checked={paymentMethod === "paystack"}
+                        onChange={() => setPaymentMethod("paystack")}
+                      />
+                      <div>
+                        <p className="font-medium">Pay Online</p>
+                        <p className="text-sm text-gray-500">
+                          Card, Bank Transfer, USSD and more.
+                        </p>
+                      </div>
+                    </label>
+                  )}
+
                 </div>
               </div>
 
@@ -272,7 +371,7 @@ ${dashboardUrl}`;
               disabled={loading || items.length === 0}
               className="mt-8 w-full rounded-xl bg-emerald-600 py-4 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
-              {loading ? "Placing Order..." : "Place Order"}
+              {loading ? "Please wait..." : buttonText}
             </button>
           </aside>
 

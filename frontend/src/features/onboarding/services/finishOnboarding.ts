@@ -11,8 +11,10 @@ import { OnboardingData } from "../hooks/useOnboarding";
 export async function finishOnboarding(
   data: OnboardingData
 ) {
-  const businessId =
+  const result =
     await createOrUpdateBusiness(data);
+
+  const businessId = result.businessId;
 
   const subscription =
     await getCurrentSubscription(
@@ -28,6 +30,20 @@ export async function finishOnboarding(
   await initializeNotificationSettings(
     businessId
   );
-
-  return businessId;
+if (result.created) {
+  await fetch(
+    "/api/onboarding/welcome",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type":
+          "application/json",
+      },
+      body: JSON.stringify({
+        businessId,
+      }),
+    }
+  );
+}
+  return result;
 }

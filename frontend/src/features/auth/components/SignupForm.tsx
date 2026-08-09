@@ -6,6 +6,46 @@ import toast from "react-hot-toast";
 
 import { signup } from "../services/signup";
 
+function getPasswordStrength(password: string) {
+  const checks = {
+    length: password.length >= 8,
+    lowercase: /[a-z]/.test(password),
+    uppercase: /[A-Z]/.test(password),
+    number: /\d/.test(password),
+    symbol: /[^A-Za-z0-9]/.test(password),
+  };
+
+  const score = Object.values(checks).filter(Boolean).length;
+
+  let label = "Very Weak";
+  let width = "0%";
+
+  if (score === 1) {
+    label = "Weak";
+    width = "20%";
+  } else if (score === 2) {
+    label = "Fair";
+    width = "40%";
+  } else if (score === 3) {
+    label = "Good";
+    width = "60%";
+  } else if (score === 4) {
+    label = "Strong";
+    width = "80%";
+  } else if (score === 5) {
+    label = "Excellent";
+    width = "100%";
+  }
+
+  return {
+    checks,
+    score,
+    label,
+    width,
+  };
+}
+
+
 export default function SignupForm() {
   const [fullName, setFullName] =
     useState("");
@@ -24,6 +64,12 @@ export default function SignupForm() {
 
   const [showPassword, setShowPassword] =
     useState(false);
+
+const [showVerificationScreen, setShowVerificationScreen] =
+  useState(false);
+
+const passwordStrength =
+  getPasswordStrength(password); 
 
   async function handleSignup() {
     if (
@@ -52,14 +98,13 @@ export default function SignupForm() {
       setLoading(true);
 
       await signup(
-        email,
-        password,
-        fullName
-      );
+  email,
+  password,
+  fullName
+);
 
-      toast.success(
-        "Account created! Please verify your email before logging in."
-      );
+setShowVerificationScreen(true);
+
     } catch (err: any) {
       toast.error(
         err.message ?? "Signup failed."
@@ -68,6 +113,45 @@ export default function SignupForm() {
       setLoading(false);
     }
   }
+
+if (showVerificationScreen) {
+  return (
+    <main className="min-h-screen flex items-center justify-center bg-slate-50 p-8">
+      <div className="w-full max-w-md rounded-3xl bg-white p-8 shadow-xl text-center">
+
+        <div className="text-5xl mb-6">📧</div>
+
+        <h1 className="text-3xl font-bold">
+          Verify your email
+        </h1>
+
+        <p className="mt-4 text-gray-600">
+          We've sent a verification link to
+        </p>
+
+        <p className="mt-2 font-semibold break-all">
+          {email}
+        </p>
+
+        <p className="mt-6 text-gray-500">
+          Please check your inbox and click the verification link to activate your Vendora account.
+        </p>
+
+        <p className="mt-4 text-sm text-gray-400">
+          If you don't see the email, check your Spam or Promotions folder.
+        </p>
+
+        <Link
+          href="/login"
+          className="mt-8 inline-block w-full rounded-xl bg-emerald-600 py-4 font-semibold text-white hover:bg-emerald-700"
+        >
+          Go to Login
+        </Link>
+
+      </div>
+    </main>
+  );
+}
 
   return (
     <main className="min-h-screen grid lg:grid-cols-2">
@@ -154,6 +238,44 @@ export default function SignupForm() {
               </button>
 
             </div>
+<div className="space-y-3">
+
+  <div className="h-2 w-full rounded-full bg-gray-200 overflow-hidden">
+    <div
+      className="h-full rounded-full bg-emerald-600 transition-all duration-300"
+      style={{ width: passwordStrength.width }}
+    />
+  </div>
+
+  <p className="text-sm font-medium text-gray-600">
+    Password strength: {passwordStrength.label}
+  </p>
+
+  <div className="grid grid-cols-1 gap-1 text-sm">
+
+    <p className={passwordStrength.checks.length ? "text-emerald-600" : "text-gray-400"}>
+      {passwordStrength.checks.length ? "✓" : "○"} At least 8 characters
+    </p>
+
+    <p className={passwordStrength.checks.lowercase ? "text-emerald-600" : "text-gray-400"}>
+      {passwordStrength.checks.lowercase ? "✓" : "○"} Lowercase letter
+    </p>
+
+    <p className={passwordStrength.checks.uppercase ? "text-emerald-600" : "text-gray-400"}>
+      {passwordStrength.checks.uppercase ? "✓" : "○"} Uppercase letter
+    </p>
+
+    <p className={passwordStrength.checks.number ? "text-emerald-600" : "text-gray-400"}>
+      {passwordStrength.checks.number ? "✓" : "○"} Number
+    </p>
+
+    <p className={passwordStrength.checks.symbol ? "text-emerald-600" : "text-gray-400"}>
+      {passwordStrength.checks.symbol ? "✓" : "○"} Special character
+    </p>
+
+  </div>
+
+</div>
 
             <input
               type={

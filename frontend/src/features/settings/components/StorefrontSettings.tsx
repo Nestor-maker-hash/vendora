@@ -18,10 +18,17 @@ export default function StorefrontSettings() {
 
   const [saving, setSaving] = useState(false);
 
-  const [phone, setPhone] = useState(""); 
-  
+  const [phone, setPhone] = useState("");
+
   const [currency, setCurrency] = useState("");
-  
+  const [payOnDeliveryEnabled, setPayOnDeliveryEnabled] = useState(true);
+  const [bankTransferEnabled, setBankTransferEnabled] = useState(false);
+  const [onlinePaymentEnabled, setOnlinePaymentEnabled] = useState(false);
+
+  const [bankName, setBankName] = useState("");
+  const [accountName, setAccountName] = useState("");
+  const [accountNumber, setAccountNumber] = useState("");
+
   useEffect(() => {
     if (!business) return;
 
@@ -29,8 +36,14 @@ export default function StorefrontSettings() {
     setSlug(business.slug ?? "");
     setDescription(business.description ?? "");
     setCurrency(business.currency ?? "USD");
+    setPayOnDeliveryEnabled(business.pay_on_delivery_enabled ?? true);
+    setBankTransferEnabled(business.bank_transfer_enabled ?? false);
+    setOnlinePaymentEnabled(business.online_payment_enabled ?? false);
+    setBankName(business.bank_name ?? "");
+    setAccountName(business.account_name ?? "");
+    setAccountNumber(business.account_number ?? "");
 
-    setLogoUrl(business.logo_url ?? ""); 
+    setLogoUrl(business.logo_url ?? "");
     setBannerUrl(business.banner_url ?? "");
     setPhone(business.phone ?? "");
   }, [business]);
@@ -50,6 +63,12 @@ export default function StorefrontSettings() {
         description,
         logo_url: logoUrl,
         banner_url: bannerUrl,
+        pay_on_delivery_enabled: payOnDeliveryEnabled,
+        bank_transfer_enabled: bankTransferEnabled,
+        online_payment_enabled: onlinePaymentEnabled,
+        bank_name: bankName,
+        account_name: accountName,
+        account_number: accountNumber,
       });
 
       toast.success("Business updated successfully");
@@ -66,174 +85,233 @@ export default function StorefrontSettings() {
   }
 
   return (
-  <div className="space-y-6">
+    <div className="space-y-6">
 
-    {/* Store Logo */}
+      {/* Store Logo */}
+      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <h2 className="mb-6 text-xl font-semibold">
+          Store Logo
+        </h2>
 
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        {logoUrl && (
+          <img
+            src={logoUrl}
+            alt="Logo"
+            className="mb-4 h-24 w-24 rounded-full object-cover"
+          />
+        )}
 
-      <h2 className="mb-6 text-xl font-semibold">
-        Store Logo
-      </h2>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
 
-      {logoUrl && (
-        <img
-          src={logoUrl}
-          alt="Logo"
-          className="mb-4 h-24 w-24 rounded-full object-cover"
+            if (!file) return;
+
+            try {
+              const url = await uploadBusinessImage(
+                file,
+                "logos"
+              );
+
+              setLogoUrl(url);
+
+              toast.success("Logo uploaded");
+            } catch (err) {
+              console.error(err);
+
+              toast.error("Upload failed");
+            }
+          }}
         />
-      )}
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-
-          if (!file) return;
-
-          try {
-            const url = await uploadBusinessImage(
-              file,
-              "logos"
-            );
-
-            setLogoUrl(url);
-
-            toast.success("Logo uploaded");
-          } catch (err) {
-            console.error(err);
-
-            toast.error("Upload failed");
-          }
-        }}
-      />
-
-    </div>
-
-    {/* Store Banner */}
-
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
-
-      <h2 className="mb-6 text-xl font-semibold">
-        Store Banner
-      </h2>
-
-      {bannerUrl && (
-        <img
-          src={bannerUrl}
-          alt="Banner"
-          className="mb-4 h-40 w-full rounded-xl object-cover"
-        />
-      )}
-
-      <input
-        type="file"
-        accept="image/*"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-
-          if (!file) return;
-
-          try {
-            const url = await uploadBusinessImage(
-              file,
-              "banners"
-            );
-
-            setBannerUrl(url);
-
-            toast.success("Banner uploaded");
-          } catch (err) {
-            console.error(err);
-
-            toast.error("Upload failed");
-          }
-        }}
-      />
-
-    </div>
-
-    {/* Business Information */}
-
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
-
-      <h2 className="mb-6 text-xl font-semibold">
-        Business Information
-      </h2>
-
-      <div className="space-y-4">
-
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            Business Name
-          </label>
-
-          <input
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border p-3"
-            disabled={saving}
-          />
-        </div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            Store Slug
-          </label>
-
-          <input
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="w-full rounded-xl border p-3"
-            disabled={saving}
-          />
-        </div>
-	
-	<div>
-  <label className="mb-1 block text-sm font-medium">
-    WhatsApp Number
-  </label>
-
-  <input
-    value={phone}
-    onChange={(e) => setPhone(e.target.value)}
-    placeholder="2348012345678"
-    className="w-full rounded-xl border p-3"
-    disabled={saving}
-  />
-
-  <p className="mt-1 text-xs text-gray-500">
-    Used for the Contact Seller button and order notifications.
-  </p>
-</div>
-
-        <div>
-          <label className="mb-1 block text-sm font-medium">
-            Description
-          </label>
-
-          <textarea
-            rows={5}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-xl border p-3"
-            disabled={saving}
-          />
-        </div>
-
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition-opacity disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
-
       </div>
 
-    </div>
+      {/* Store Banner */}
+      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <h2 className="mb-6 text-xl font-semibold">
+          Store Banner
+        </h2>
 
-  </div>
-);
+        {bannerUrl && (
+          <img
+            src={bannerUrl}
+            alt="Banner"
+            className="mb-4 h-40 w-full rounded-xl object-cover"
+          />
+        )}
+
+        <input
+          type="file"
+          accept="image/*"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+
+            if (!file) return;
+
+            try {
+              const url = await uploadBusinessImage(
+                file,
+                "banners"
+              );
+
+              setBannerUrl(url);
+
+              toast.success("Banner uploaded");
+            } catch (err) {
+              console.error(err);
+
+              toast.error("Upload failed");
+            }
+          }}
+        />
+      </div>
+
+      {/* Business Information */}
+      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+        <h2 className="mb-6 text-xl font-semibold">
+          Business Information
+        </h2>
+
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Business Name
+            </label>
+
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full rounded-xl border p-3"
+              disabled={saving}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Store Slug
+            </label>
+
+            <input
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+              className="w-full rounded-xl border p-3"
+              disabled={saving}
+            />
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              WhatsApp Number
+            </label>
+
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="2348012345678"
+              className="w-full rounded-xl border p-3"
+              disabled={saving}
+            />
+
+            <p className="mt-1 text-xs text-gray-500">
+              Used for the Contact Seller button and order notifications.
+            </p>
+          </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Description
+            </label>
+
+            <textarea
+              rows={5}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full rounded-xl border p-3"
+              disabled={saving}
+            />
+          </div>
+
+          <div className="border-t pt-6">
+            <h3 className="mb-4 text-lg font-semibold">
+              Payment Settings
+            </h3>
+
+            <div className="space-y-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={payOnDeliveryEnabled}
+                  onChange={(e) =>
+                    setPayOnDeliveryEnabled(e.target.checked)
+                  }
+                />
+                <span>Enable Pay on Delivery</span>
+              </label>
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={bankTransferEnabled}
+                  onChange={(e) =>
+                    setBankTransferEnabled(e.target.checked)
+                  }
+                />
+                <span>Enable Bank Transfer</span>
+              </label>
+
+              {bankTransferEnabled && (
+                <div className="space-y-3 rounded-xl border p-4">
+                  <input
+                    value={bankName}
+                    onChange={(e) => setBankName(e.target.value)}
+                    placeholder="Bank Name"
+                    className="w-full rounded-xl border p-3"
+                  />
+
+                  <input
+                    value={accountName}
+                    onChange={(e) => setAccountName(e.target.value)}
+                    placeholder="Account Name"
+                    className="w-full rounded-xl border p-3"
+                  />
+
+                  <input
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    placeholder="Account Number"
+                    className="w-full rounded-xl border p-3"
+                  />
+                </div>
+              )}
+
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={onlinePaymentEnabled}
+                  onChange={(e) =>
+                    setOnlinePaymentEnabled(e.target.checked)
+                  }
+                />
+                <span>Enable Online Payment</span>
+              </label>
+
+              <p className="text-sm text-gray-500">
+                Online payments will use Paystack after integration.
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition-opacity disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save Changes"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
+

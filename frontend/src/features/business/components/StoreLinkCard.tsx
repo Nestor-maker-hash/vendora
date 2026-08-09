@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useBusiness } from "@/src/features/business/hooks/useBusiness";
+import toast from "react-hot-toast";
 
 export default function StoreLinkCard() {
   const { business, loading } = useBusiness();
@@ -28,10 +29,15 @@ const storeUrl =
     : `/store/${business.slug}`;
 
 
-  async function copyLink() {
+ async function copyLink() {
+  try {
     await navigator.clipboard.writeText(storeUrl);
-    alert("✅ Store link copied!");
+
+    toast.success("Store link copied to clipboard!");
+  } catch {
+    toast.error("Unable to copy store link. Please try again.");
   }
+}
 
   return (
     <div className="mt-8 rounded-xl border bg-white p-6 shadow">

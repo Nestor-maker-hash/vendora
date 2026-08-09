@@ -5,6 +5,8 @@ import { Order } from "../types/order";
 interface GetBusinessOrdersOptions {
   limit?: number;
   status?: string;
+  paymentStatus?: string;
+  paymentMethod?: string;
   ascending?: boolean;
 }
 
@@ -35,6 +37,19 @@ export async function getBusinessOrders(
   if (options.status) {
     query = query.eq("status", options.status);
   }
+if (options.paymentStatus) {
+  query = query.eq(
+    "payment_status",
+    options.paymentStatus
+  );
+}
+
+if (options.paymentMethod) {
+  query = query.eq(
+    "payment_method",
+    options.paymentMethod
+  );
+}
 
   if (options.limit) {
     query = query.limit(options.limit);

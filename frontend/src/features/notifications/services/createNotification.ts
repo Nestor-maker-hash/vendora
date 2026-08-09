@@ -1,4 +1,4 @@
-import { supabase } from "@/src/lib/supabase";
+import { supabaseServer } from "@/src/lib/supabaseServer";
 
 interface CreateNotificationData {
   businessId: string;
@@ -14,7 +14,8 @@ interface CreateNotificationData {
 export async function createNotification(
   data: CreateNotificationData
 ) {
-  const { error } = await supabase
+
+  const { error } = await supabaseServer
     .from("notifications")
     .insert({
       business_id: data.businessId,
