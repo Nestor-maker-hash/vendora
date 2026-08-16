@@ -81,7 +81,7 @@ function handleNext() {
     })
   }
   className="w-full rounded-xl border p-4 outline-none focus:border-emerald-600"
-  placeholder="e.g. Nestor Fashion"
+  placeholder="e.g. Xclusive Fashion"
 />
 
         </div>

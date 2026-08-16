@@ -72,48 +72,71 @@ const passwordStrength =
   getPasswordStrength(password); 
 
   async function handleSignup() {
-    if (
-      !fullName ||
-      !email ||
-      !password ||
-      !confirmPassword
-    ) {
-      toast.error("Please complete every field.");
-      return;
-    }
+  console.log("CREATE ACCOUNT CLICKED");
 
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match.");
-      return;
-    }
-
-    if (password.length < 8) {
-      toast.error(
-        "Password must be at least 8 characters."
-      );
-      return;
-    }
-
-    try {
-      setLoading(true);
-
-      await signup(
-  email,
-  password,
-  fullName
-);
-
-setShowVerificationScreen(true);
-
-    } catch (err: any) {
-      toast.error(
-        err.message ?? "Signup failed."
-      );
-    } finally {
-      setLoading(false);
-    }
+  if (
+    !fullName ||
+    !email ||
+    !password ||
+    !confirmPassword
+  ) {
+    toast.error("Please complete every field.");
+    return;
   }
 
+  if (password !== confirmPassword) {
+    toast.error("Passwords do not match.");
+    return;
+  }
+
+  if (password.length < 8) {
+    toast.error(
+      "Password must be at least 8 characters."
+    );
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    console.log("Calling signup service...");
+
+    const user = await signup(
+      email,
+      password,
+      fullName
+    );
+
+    console.log("Signup returned:", user);
+
+    setShowVerificationScreen(true);
+  } catch (err: any) {
+  console.error("Signup failed:", err);
+
+  const message =
+    err?.message?.toLowerCase() ?? "";
+
+  if (
+    message.includes("already registered") ||
+    message.includes("already exists") ||
+    message.includes("user already registered")
+  ) {
+    toast.error(
+      "An account with this email already exists. Please log in instead.",
+      {
+        duration: 5000,
+      }
+    );
+  } else {
+    toast.error(
+      err?.message ?? "Signup failed."
+    );
+  }
+} finally {
+  setLoading(false);
+}
+
+}
 if (showVerificationScreen) {
   return (
     <main className="min-h-screen flex items-center justify-center bg-slate-50 p-8">

@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { login } from "../services/login";
 import { getBusinessAfterLogin } from "../services/getBusinessAfterLogin";
 import { resendVerificationEmail } from "../services/resendVerificationEmail";
+import { loginWithGoogle } from "../services/loginWithGoogle";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -17,6 +18,7 @@ export default function LoginForm() {
   const [resendingEmail, setResendingEmail] = useState(false);
   const [showResendVerification, setShowResendVerification] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   async function handleResendVerificationEmail() {
     if (!email.trim()) {
@@ -40,6 +42,23 @@ export default function LoginForm() {
       setResendingEmail(false);
     }
   }
+
+ async function handleGoogleLogin() {
+  try {
+    setGoogleLoading(true);
+
+    await loginWithGoogle();
+  } catch (err: any) {
+    console.error("Google login failed:", err);
+
+    toast.error(
+      err?.message ?? "Unable to continue with Google."
+    );
+
+    setGoogleLoading(false);
+  }
+}
+
 
   async function handleLogin() {
     if (!email || !password) {
@@ -100,6 +119,34 @@ export default function LoginForm() {
           <h2 className="text-3xl font-bold">Login</h2>
 
           <p className="mt-2 text-gray-500">Welcome back to Vendora.</p>
+
+
+	<button
+  type="button"
+  onClick={handleGoogleLogin}
+  disabled={loading || googleLoading}
+  className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-6 py-4 font-semibold text-gray-800 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+>
+  <span className="text-lg font-bold">
+    G
+  </span>
+
+  {googleLoading
+    ? "Connecting to Google..."
+    : "Continue with Google"}
+</button>
+
+<div className="flex items-center gap-4">
+  <div className="h-px flex-1 bg-gray-200" />
+
+  <span className="text-sm text-gray-400">
+    or
+  </span>
+
+  <div className="h-px flex-1 bg-gray-200" />
+</div>
+
+
 
           <div className="mt-8 space-y-5">
             <input
@@ -169,4 +216,3 @@ export default function LoginForm() {
     </main>
   );
 }
-

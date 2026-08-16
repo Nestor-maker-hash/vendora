@@ -21,7 +21,7 @@ interface CartContextType {
   currency: string;
   setCurrency: (currency: string) => void;
 
-  addToCart: (product: Product) => void;
+  addToCart: (product: Product, quantity?: number) => void;
 
   increaseQuantity: (id: string) => void;
   decreaseQuantity: (id: string) => void;
@@ -40,7 +40,7 @@ export function CartProvider({
 }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
-  const [currency, setCurrency] = useState("USD");
+  const [currency, setCurrency] = useState("");
 
   useEffect(() => {
     const savedItems = localStorage.getItem("vendora-cart");
@@ -85,18 +85,36 @@ export function CartProvider({
     );
   }, [currency]);
 
-  function addToCart(product: Product) {
+  function addToCart(
+    product: Product,
+    requestedQuantity?: number
+  ) {
+    const minimumQuantity =
+      product.minimum_order_quantity ?? 1;
+
+    if (product.stock < minimumQuantity) {
+      return;
+    }
+
+    const quantity = Math.min(
+      Math.max(
+        requestedQuantity ?? minimumQuantity,
+        minimumQuantity
+      ),
+      product.stock
+    );
+
     setItems((current) => {
       const existing = current.find(
         (item) => item.id === product.id
-      );
+     );
 
       if (existing) {
         return current.map((item) =>
           item.id === product.id
             ? {
                 ...item,
-                quantity: item.quantity + 1,
+                quantity,
               }
             : item
         );
@@ -106,7 +124,7 @@ export function CartProvider({
         ...current,
         {
           ...product,
-          quantity: 1,
+          quantity,
         },
       ];
     });
@@ -114,14 +132,20 @@ export function CartProvider({
 
   function increaseQuantity(id: string) {
     setItems((current) =>
-      current.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-          : item
-      )
+      current.map((item) => {
+        if (item.id !== id) {
+          return item;
+        }
+
+        if (item.quantity >= item.stock) {
+          return item;
+        }
+
+        return {
+          ...item,
+          quantity: item.quantity + 1,
+        };
+      })
     );
   }
 
@@ -132,8 +156,11 @@ export function CartProvider({
           return item;
         }
 
-        if (item.quantity === 1) {
-          return [];
+        const minimumQuantity =
+          item.minimum_order_quantity ?? 1;
+
+        if (item.quantity <= minimumQuantity) {
+          return item;
         }
 
         return {
@@ -153,7 +180,7 @@ export function CartProvider({
   function clearCart() {
     setItems([]);
     setStoreSlug(null);
-    setCurrency("USD");
+    setCurrency("");
   }
 
   return (

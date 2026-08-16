@@ -5,9 +5,11 @@ import { supabase } from "@/src/lib/supabase";
 import { Business } from "../types/business";
 
 export function useBusiness() {
-const [business, setBusiness] =
-  useState<Business | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [business, setBusiness] =
+    useState<Business | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     async function loadBusiness() {
@@ -32,10 +34,13 @@ const [business, setBusiness] =
 
     loadBusiness();
   }, []);
-const currency = business?.currency ?? "USD";
+
+  const currency: string =
+    business?.currency ?? "NGN";
+
   return {
-  business,
-  currency,
-  loading,
-};
+    business,
+    currency,
+    loading,
+  };
 }

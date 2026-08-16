@@ -12,22 +12,10 @@ export default function StorefrontSettings() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
-
   const [logoUrl, setLogoUrl] = useState("");
   const [bannerUrl, setBannerUrl] = useState("");
-
-  const [saving, setSaving] = useState(false);
-
   const [phone, setPhone] = useState("");
-
-  const [currency, setCurrency] = useState("");
-  const [payOnDeliveryEnabled, setPayOnDeliveryEnabled] = useState(true);
-  const [bankTransferEnabled, setBankTransferEnabled] = useState(false);
-  const [onlinePaymentEnabled, setOnlinePaymentEnabled] = useState(false);
-
-  const [bankName, setBankName] = useState("");
-  const [accountName, setAccountName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!business) return;
@@ -35,14 +23,6 @@ export default function StorefrontSettings() {
     setName(business.name ?? "");
     setSlug(business.slug ?? "");
     setDescription(business.description ?? "");
-    setCurrency(business.currency ?? "USD");
-    setPayOnDeliveryEnabled(business.pay_on_delivery_enabled ?? true);
-    setBankTransferEnabled(business.bank_transfer_enabled ?? false);
-    setOnlinePaymentEnabled(business.online_payment_enabled ?? false);
-    setBankName(business.bank_name ?? "");
-    setAccountName(business.account_name ?? "");
-    setAccountNumber(business.account_number ?? "");
-
     setLogoUrl(business.logo_url ?? "");
     setBannerUrl(business.banner_url ?? "");
     setPhone(business.phone ?? "");
@@ -59,22 +39,15 @@ export default function StorefrontSettings() {
         name,
         slug,
         phone,
-        currency,
         description,
         logo_url: logoUrl,
         banner_url: bannerUrl,
-        pay_on_delivery_enabled: payOnDeliveryEnabled,
-        bank_transfer_enabled: bankTransferEnabled,
-        online_payment_enabled: onlinePaymentEnabled,
-        bank_name: bankName,
-        account_name: accountName,
-        account_number: accountNumber,
       });
 
-      toast.success("Business updated successfully");
+      toast.success("Storefront updated successfully");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update business");
+      toast.error("Failed to update storefront");
     } finally {
       setSaving(false);
     }
@@ -84,9 +57,16 @@ export default function StorefrontSettings() {
     return <p>Loading...</p>;
   }
 
+  if (!business) {
+    return (
+      <p className="text-gray-500">
+        Business information could not be loaded.
+      </p>
+    );
+  }
+
   return (
     <div className="space-y-6">
-
       {/* Store Logo */}
       <div className="rounded-2xl border bg-white p-6 shadow-sm">
         <h2 className="mb-6 text-xl font-semibold">
@@ -104,6 +84,7 @@ export default function StorefrontSettings() {
         <input
           type="file"
           accept="image/*"
+          disabled={saving}
           onChange={async (e) => {
             const file = e.target.files?.[0];
 
@@ -120,7 +101,6 @@ export default function StorefrontSettings() {
               toast.success("Logo uploaded");
             } catch (err) {
               console.error(err);
-
               toast.error("Upload failed");
             }
           }}
@@ -144,6 +124,7 @@ export default function StorefrontSettings() {
         <input
           type="file"
           accept="image/*"
+          disabled={saving}
           onChange={async (e) => {
             const file = e.target.files?.[0];
 
@@ -160,7 +141,6 @@ export default function StorefrontSettings() {
               toast.success("Banner uploaded");
             } catch (err) {
               console.error(err);
-
               toast.error("Upload failed");
             }
           }}
@@ -214,7 +194,8 @@ export default function StorefrontSettings() {
             />
 
             <p className="mt-1 text-xs text-gray-500">
-              Used for the Contact Seller button and order notifications.
+              Used for the Contact Seller button and order
+              notifications.
             </p>
           </div>
 
@@ -226,92 +207,23 @@ export default function StorefrontSettings() {
             <textarea
               rows={5}
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) =>
+                setDescription(e.target.value)
+              }
               className="w-full rounded-xl border p-3"
               disabled={saving}
             />
           </div>
 
-          <div className="border-t pt-6">
-            <h3 className="mb-4 text-lg font-semibold">
-              Payment Settings
-            </h3>
-
-            <div className="space-y-4">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={payOnDeliveryEnabled}
-                  onChange={(e) =>
-                    setPayOnDeliveryEnabled(e.target.checked)
-                  }
-                />
-                <span>Enable Pay on Delivery</span>
-              </label>
-
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={bankTransferEnabled}
-                  onChange={(e) =>
-                    setBankTransferEnabled(e.target.checked)
-                  }
-                />
-                <span>Enable Bank Transfer</span>
-              </label>
-
-              {bankTransferEnabled && (
-                <div className="space-y-3 rounded-xl border p-4">
-                  <input
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    placeholder="Bank Name"
-                    className="w-full rounded-xl border p-3"
-                  />
-
-                  <input
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
-                    placeholder="Account Name"
-                    className="w-full rounded-xl border p-3"
-                  />
-
-                  <input
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder="Account Number"
-                    className="w-full rounded-xl border p-3"
-                  />
-                </div>
-              )}
-
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={onlinePaymentEnabled}
-                  onChange={(e) =>
-                    setOnlinePaymentEnabled(e.target.checked)
-                  }
-                />
-                <span>Enable Online Payment</span>
-              </label>
-
-              <p className="text-sm text-gray-500">
-                Online payments will use Paystack after integration.
-              </p>
-            </div>
-          </div>
-
           <button
             onClick={handleSave}
             disabled={saving}
-            className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition-opacity disabled:opacity-50"
+            className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition-opacity hover:bg-emerald-700 disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? "Saving..." : "Save Storefront"}
           </button>
         </div>
       </div>
     </div>
   );
 }
-

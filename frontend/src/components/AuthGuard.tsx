@@ -36,16 +36,23 @@ export default function AuthGuard({
       const currentPath = window.location.pathname;
 
       // Logged in but hasn't completed onboarding
-      if (!business && currentPath !== "/onboarding") {
-        router.replace("/onboarding");
-        return;
-      }
+if (
+  (!business || !business.currency) &&
+  currentPath !== "/onboarding"
+) {
+  router.replace("/onboarding");
+  return;
+}
 
-      // Already has a business but somehow visits onboarding
-      if (business && currentPath === "/onboarding") {
-        router.replace("/dashboard");
-        return;
-      }
+// Already completed onboarding but somehow visits onboarding
+if (
+  business &&
+  business.currency &&
+  currentPath === "/onboarding"
+) {
+  router.replace("/dashboard");
+  return;
+}
 
       setLoading(false);
     }

@@ -8,13 +8,14 @@ export function useUpdateProduct() {
 
   async function editProduct(
     id: string,
-    product: {
-      name: string;
-      description: string;
-      price: number;
-      stock: number;
-      image_url?: string | null;
-    }
+ product: {
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  minimum_order_quantity: number;
+  image_url?: string | null;
+}
   ) {
     setLoading(true);
 

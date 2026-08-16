@@ -1,3 +1,4 @@
+import { supabaseServer } from "@/src/lib/supabaseServer";
 import { supabase } from "@/src/lib/supabase";
 import { CartItem } from "@/src/features/cart/types/cart";
 import { OrderItem } from "../types/orderItem";
@@ -22,7 +23,7 @@ interface CheckoutData {
   address: string;
   notes?: string;
 
-  deliveryFee: number;
+  deliveryZoneId: string;
 
   items: CartItem[];
   paymentMethod: PaymentMethod;
@@ -31,10 +32,24 @@ interface CheckoutData {
 export async function createOrder(
   data: CheckoutData
 ): Promise<Order> {
-// Validate stock before creating the order
+ // Validate each product before creating the order
 for (const item of data.items) {
   const product = await getProductById(item.id);
 
+  const minimumOrderQuantity =
+    product.minimum_order_quantity ?? 1;
+
+  // Each product can have its own minimum order quantity.
+  // The minimum is not applied to the entire order.
+  if (item.quantity < minimumOrderQuantity) {
+    throw new Error(
+      `${product.name} requires a minimum order of ${minimumOrderQuantity} unit${
+        minimumOrderQuantity === 1 ? "" : "s"
+      }.`
+    );
+  }
+
+  // Always validate against the latest stock from the database.
   if (product.stock < item.quantity) {
     throw new Error(
       `${product.name} only has ${product.stock} item(s) left in stock.`
@@ -47,7 +62,27 @@ for (const item of data.items) {
     0
   );
 
-  const total = subtotal + data.deliveryFee;
+  const { data: deliveryZone, error: deliveryZoneError } =
+  await supabaseServer
+    .from("delivery_zones")
+    .select("*")
+    .eq("id", data.deliveryZoneId)
+    .eq("business_id", data.businessId)
+    .maybeSingle();
+
+if (deliveryZoneError) {
+  throw deliveryZoneError;
+}
+
+if (!deliveryZone) {
+  throw new Error("Invalid delivery location.");
+}
+
+const deliveryFee = deliveryZone.free_delivery
+  ? 0
+  : Number(deliveryZone.price);
+
+  const total = subtotal + deliveryFee;
 
   const { data: order, error } = await supabase
     .from("orders")
@@ -64,17 +99,17 @@ for (const item of data.items) {
       notes: data.notes,
 
       subtotal,
-      delivery_fee: data.deliveryFee,
+      delivery_fee: deliveryFee,
       total,
-    payment_method: data.paymentMethod,
-    
-status: "pending",
+      payment_method: data.paymentMethod,
 
-payment_status: "pending",
+      status: "pending",
 
-payment_reference: null,
+      payment_status: "pending",
 
-paid_at: null,
+      payment_reference: null,
+
+      paid_at: null,
     })
     .select()
     .single();
@@ -97,27 +132,29 @@ paid_at: null,
     .insert(orderItems);
 
   if (itemsError) throw itemsError;
-for (const item of data.items) {
-  await updateProductStock(
-    item.id,
-    -item.quantity
-  );
-}
-const business = await getBusinessById(
-  data.businessId
-);
 
-try {
-  await notifyMerchant(
-    order as Order,
-    business.currency
-  );
-} catch (err) {
-  console.error(
-    "Merchant notification failed:",
-    err
-  );
-}
+  for (const item of data.items) {
+    await updateProductStock(
+      item.id,
+      -item.quantity
+    );
+  }
 
-return order as Order;
+  const business = await getBusinessById(
+    data.businessId
+  );
+
+  try {
+    await notifyMerchant(
+      order as Order,
+      business.currency
+    );
+  } catch (err) {
+    console.error(
+      "Merchant notification failed:",
+      err
+    );
+  }
+
+  return order as Order;
 }

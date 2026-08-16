@@ -1,5 +1,6 @@
 "use client";
 
+import { Product } from "@/src/features/products/types/product";
 import Button from "@/src/components/ui/Button";
 import Link from "next/link";
 import { useCart } from "@/src/features/cart/context/CartContext";
@@ -8,14 +9,7 @@ import { useState } from "react";
 import { formatCurrency } from "@/src/utils/formatCurrency";
 
 interface ProductCardProps {
-  product: {
-    id: string;
-    name: string;
-    description?: string | null;
-    price: number;
-    stock: number;
-    image_url?: string | null;
-  };
+  product: Product;
 
   mode?: "dashboard" | "store";
   currency: string;
@@ -34,11 +28,11 @@ export default function ProductCard({
   onEdit,
   onDelete,
 }: ProductCardProps) {
-const {
-  addToCart,
-  setStoreSlug,
-  setCurrency,
-} = useCart();
+  const {
+    addToCart,
+    setStoreSlug,
+    setCurrency,
+  } = useCart();
   const [showToast, setShowToast] = useState(false);
 
   function handleAddToCart() {
@@ -48,7 +42,7 @@ const {
     const slug = href.split("/")[2];
     setStoreSlug(slug);
     setCurrency(currency);
-    addToCart(product as any);
+    addToCart(product);
 
     setShowToast(true);
     setTimeout(() => {
@@ -99,6 +93,12 @@ const {
               {product.stock > 0 ? `${product.stock} left` : "Sold Out"}
             </span>
           </div>
+
+          {product.minimum_order_quantity > 1 && (
+            <p className="text-xs font-medium text-gray-500">
+              Minimum order: {product.minimum_order_quantity}
+            </p>
+          )}
 
           <Button
             onClick={(e) => {

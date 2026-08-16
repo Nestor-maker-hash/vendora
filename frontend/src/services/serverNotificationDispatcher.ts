@@ -32,8 +32,11 @@ export async function dispatchNotificationServer(
         data.businessId
       );
 
-    const shouldSendWhatsApp =
-      settings.whatsapp_orders;
+	const shouldSendWhatsApp =
+  data.type === NotificationType.LOW_STOCK
+    ? settings.low_stock_alerts
+    : settings.whatsapp_orders;
+
 
     if (
       shouldSendWhatsApp &&

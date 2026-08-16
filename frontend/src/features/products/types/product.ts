@@ -8,6 +8,8 @@ export interface Product {
   price: number;
   stock: number;
 
+  minimum_order_quantity: number;
+
   image_url: string | null;
 
   created_at: string;

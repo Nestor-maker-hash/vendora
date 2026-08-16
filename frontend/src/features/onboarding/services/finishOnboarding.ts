@@ -11,6 +11,12 @@ import { OnboardingData } from "../hooks/useOnboarding";
 export async function finishOnboarding(
   data: OnboardingData
 ) {
+  if (!data.currency) {
+    throw new Error(
+      "Currency must be selected before completing onboarding."
+    );
+  }
+
   const result =
     await createOrUpdateBusiness(data);
 
@@ -30,20 +36,22 @@ export async function finishOnboarding(
   await initializeNotificationSettings(
     businessId
   );
-if (result.created) {
-  await fetch(
-    "/api/onboarding/welcome",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type":
-          "application/json",
-      },
-      body: JSON.stringify({
-        businessId,
-      }),
-    }
-  );
-}
+
+  if (result.created) {
+    await fetch(
+      "/api/onboarding/welcome",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json",
+        },
+        body: JSON.stringify({
+          businessId,
+        }),
+      }
+    );
+  }
+
   return result;
 }

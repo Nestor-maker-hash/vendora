@@ -5,7 +5,7 @@ export async function getBusinessAfterLogin(
 ) {
   const { data, error } = await supabase
     .from("businesses")
-    .select("id")
+    .select("id, currency")
     .eq("owner_id", ownerId)
     .maybeSingle();
 

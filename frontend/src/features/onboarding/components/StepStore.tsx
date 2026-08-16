@@ -87,6 +87,13 @@ useEffect(() => {
 
   return;
 }	
+
+ if (!data.currency) {
+  toast.error(
+    "Please select your store currency."
+  );
+  return;
+}
     next();
   }
 
@@ -180,23 +187,27 @@ useEffect(() => {
     Store Currency
   </label>
 
-  <select
-    value={data.currency}
-    onChange={(e) =>
-      update({
-        currency: e.target.value,
-      })
-    }
-    className="w-full rounded-xl border p-3 outline-none focus:border-emerald-600"
-  >
-    <option value="NGN">🇳🇬 Nigerian Naira (₦)</option>
-    <option value="USD">🇺🇸 US Dollar ($)</option>
-    <option value="GHS">🇬🇭 Ghana Cedi (GH₵)</option>
-    <option value="KES">🇰🇪 Kenyan Shilling (KSh)</option>
-    <option value="ZAR">🇿🇦 South African Rand (R)</option>
-    <option value="GBP">🇬🇧 Pound Sterling (£)</option>
-    <option value="EUR">🇪🇺 Euro (€)</option>
-  </select>
+<select
+  value={data.currency ?? ""}
+  onChange={(e) =>
+    update({
+      currency: e.target.value,
+    })
+  }
+  className="w-full rounded-xl border p-3 outline-none focus:border-emerald-600"
+>
+  <option value="" disabled>
+    Select your currency
+  </option>
+
+  <option value="NGN">🇳🇬 Nigerian Naira (₦)</option>
+  <option value="USD">🇺🇸 US Dollar ($)</option>
+  <option value="GHS">🇬🇭 Ghana Cedi (GH₵)</option>
+  <option value="KES">🇰🇪 Kenyan Shilling (KSh)</option>
+  <option value="ZAR">🇿🇦 South African Rand (R)</option>
+  <option value="GBP">🇬🇧 Pound Sterling (£)</option>
+  <option value="EUR">🇪🇺 Euro (€)</option>
+</select>
 
   <p className="mt-2 text-sm text-gray-500">
     This is the currency customers will see in your store.

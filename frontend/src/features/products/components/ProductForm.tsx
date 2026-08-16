@@ -11,13 +11,14 @@ import toast from "react-hot-toast";
 
 // Step 1: Component Interface Definition
 interface ProductFormProps {
-  initialValues?: {
-    name: string;
-    description?: string | null;
-    price: number;
-    stock: number;
-    image_url?: string | null;
-  };
+ initialValues?: {
+  name: string;
+  description?: string | null;
+  price: number;
+  stock: number;
+  minimum_order_quantity?: number;
+  image_url?: string | null;
+};
   productId?: string;
 }
 
@@ -31,7 +32,13 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
   const [description, setDescription] = useState(initialValues?.description ?? "");
   const [price, setPrice] = useState(initialValues ? String(initialValues.price) : "");
   const [stock, setStock] = useState(initialValues ? String(initialValues.stock) : "");
-  
+  const [minimumOrderQuantity, setMinimumOrderQuantity] =
+  useState(
+    initialValues?.minimum_order_quantity !== undefined
+      ? String(initialValues.minimum_order_quantity)
+      : "1"
+  );
+
   const [image, setImage] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState(initialValues?.image_url ?? "");
 
@@ -51,13 +58,16 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
         activeImageUrl = uploadedUrl;
       }
 
-      const payload = {
-        name,
-        description,
-        price: Number(price),
-        stock: Number(stock),
-        image_url: activeImageUrl,
-      };
+     const payload = {
+  name,
+  description,
+  price: Number(price),
+  stock: Number(stock),
+  minimum_order_quantity: Number(
+    minimumOrderQuantity
+  ),
+  image_url: activeImageUrl,
+};
 
       // Direct submission path depending on presence of a productId
       if (productId) {
@@ -137,6 +147,30 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
         />
       </div>
 
+	<div>
+  <label className="mb-2 block text-sm font-medium">
+    Minimum Order Quantity
+  </label>
+
+  <input
+    type="number"
+    min="1"
+    step="1"
+    value={minimumOrderQuantity}
+    onChange={(e) =>
+      setMinimumOrderQuantity(e.target.value)
+    }
+    placeholder="1"
+    className="w-full rounded-lg border p-3"
+    required
+  />
+
+  <p className="mt-1 text-xs text-gray-500">
+    The minimum number of units a customer must buy for
+    this product. Use 1 if there is no minimum.
+  </p>
+</div>
+
       <div>
         <label className="mb-2 block text-sm font-medium">
           Product Image
@@ -158,12 +192,11 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
         disabled={isSubmitting}
         className="w-full py-3"
       >
-        {isSubmitting 
-          ? (productId ? "Saving..." : "Creating...") 
+        {isSubmitting
+          ? (productId ? "Saving..." : "Creating...")
           : (productId ? "Save Changes" : "Create Product")
         }
       </Button>
     </form>
   );
 }
-

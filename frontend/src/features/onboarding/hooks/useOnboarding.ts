@@ -11,7 +11,7 @@ export interface OnboardingData {
 
   description: string;
   slug: string;
-  currency: string;
+  currency: string | null;
 
   address: string;
   state: string;
@@ -34,7 +34,7 @@ const initialData: OnboardingData = {
 
   description: "",
   slug: "",
-  currency: "USD",
+  currency: null,
   address: "",
   state: "",
   city: "",

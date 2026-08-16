@@ -1,6 +1,7 @@
 "use client";
 
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
+import toast from "react-hot-toast";
 
 import {
   useOnboardingContext,
@@ -20,6 +21,15 @@ export default function StepBranding({
   const { data, update } =
     useOnboardingContext();
 
+  const [uploadingLogo, setUploadingLogo] =
+    useState(false);
+
+  const [uploadingBanner, setUploadingBanner] =
+    useState(false);
+
+  const uploading =
+    uploadingLogo || uploadingBanner;
+
   async function uploadLogo(
     e: ChangeEvent<HTMLInputElement>
   ) {
@@ -27,11 +37,33 @@ export default function StepBranding({
 
     if (!file) return;
 
-const url = await uploadBusinessImage(file, "logos");
+    try {
+      setUploadingLogo(true);
 
-    update({
-      logo_url: url,
-    });
+      const url =
+        await uploadBusinessImage(
+          file,
+          "logos"
+        );
+
+      update({
+        logo_url: url,
+      });
+
+      toast.success("Logo uploaded.");
+    } catch (error) {
+      console.error(
+        "Logo upload failed:",
+        error
+      );
+
+      toast.error(
+        "Unable to upload your logo."
+      );
+    } finally {
+      setUploadingLogo(false);
+      e.target.value = "";
+    }
   }
 
   async function uploadBanner(
@@ -41,16 +73,37 @@ const url = await uploadBusinessImage(file, "logos");
 
     if (!file) return;
 
-const url = await uploadBusinessImage(file, "banners");
+    try {
+      setUploadingBanner(true);
 
-    update({
-      banner_url: url,
-    });
+      const url =
+        await uploadBusinessImage(
+          file,
+          "banners"
+        );
+
+      update({
+        banner_url: url,
+      });
+
+      toast.success("Banner uploaded.");
+    } catch (error) {
+      console.error(
+        "Banner upload failed:",
+        error
+      );
+
+      toast.error(
+        "Unable to upload your banner."
+      );
+    } finally {
+      setUploadingBanner(false);
+      e.target.value = "";
+    }
   }
 
   return (
     <div>
-
       <h1 className="text-3xl font-bold">
         Branding
       </h1>
@@ -62,8 +115,7 @@ const url = await uploadBusinessImage(file, "banners");
       </p>
 
       <div className="mt-8 space-y-8">
-<div>
-
+        <div>
           <label className="mb-3 block font-medium">
             Business Logo
           </label>
@@ -71,7 +123,7 @@ const url = await uploadBusinessImage(file, "banners");
           {data.logo_url && (
             <img
               src={data.logo_url}
-              alt="Logo"
+              alt="Business logo"
               className="mb-4 h-24 w-24 rounded-full border object-cover"
             />
           )}
@@ -80,11 +132,17 @@ const url = await uploadBusinessImage(file, "banners");
             type="file"
             accept="image/*"
             onChange={uploadLogo}
+            disabled={uploading}
           />
 
+          {uploadingLogo && (
+            <p className="mt-2 text-sm text-gray-500">
+              Uploading logo...
+            </p>
+          )}
         </div>
-<div>
 
+        <div>
           <label className="mb-3 block font-medium">
             Store Banner
           </label>
@@ -92,7 +150,7 @@ const url = await uploadBusinessImage(file, "banners");
           {data.banner_url && (
             <img
               src={data.banner_url}
-              alt="Banner"
+              alt="Store banner"
               className="mb-4 h-40 w-full rounded-xl border object-cover"
             />
           )}
@@ -101,29 +159,34 @@ const url = await uploadBusinessImage(file, "banners");
             type="file"
             accept="image/*"
             onChange={uploadBanner}
+            disabled={uploading}
           />
 
+          {uploadingBanner && (
+            <p className="mt-2 text-sm text-gray-500">
+              Uploading banner...
+            </p>
+          )}
         </div>
-</div>
+      </div>
 
       <div className="mt-10 flex justify-between">
-
         <button
           onClick={back}
-          className="rounded-xl border px-6 py-3"
+          disabled={uploading}
+          className="rounded-xl border px-6 py-3 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Back
         </button>
 
         <button
           onClick={next}
-          className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white"
+          disabled={uploading}
+          className="rounded-xl bg-emerald-600 px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           Continue
         </button>
-
       </div>
-
     </div>
   );
 }

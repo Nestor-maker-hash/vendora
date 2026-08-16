@@ -7,6 +7,8 @@ interface Props {
 
 const sections = [
   "Storefront",
+  "Payments",
+  "Delivery",
   "Password & Security",
   "Analytics",
   "Notifications",

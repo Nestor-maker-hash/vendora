@@ -6,6 +6,7 @@ interface CreateProductInput {
   description?: string;
   price: number;
   stock: number;
+  minimum_order_quantity?: number;
   image_url?: string;
 }
 
@@ -31,6 +32,18 @@ export async function createProduct(
     throw new Error("Business not found");
   }
 
+  const minimumOrderQuantity =
+    input.minimum_order_quantity ?? 1;
+
+  if (
+    !Number.isInteger(minimumOrderQuantity) ||
+    minimumOrderQuantity < 1
+  ) {
+    throw new Error(
+      "Minimum order quantity must be a whole number of at least 1."
+    );
+  }
+
   const { data, error } = await supabase
     .from("products")
     .insert({
@@ -39,6 +52,7 @@ export async function createProduct(
       description: input.description,
       price: input.price,
       stock: input.stock,
+      minimum_order_quantity: minimumOrderQuantity,
       image_url: input.image_url,
     })
     .select()

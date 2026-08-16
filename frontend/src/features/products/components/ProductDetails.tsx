@@ -4,47 +4,64 @@ import { Product } from "../types/product";
 import { useState } from "react";
 import Toast from "@/src/components/ui/Toast";
 import { useCart } from "@/src/features/cart/context/CartContext";
-import Link from "next/link";
 import { formatCurrency } from "@/src/utils/formatCurrency";
-
 
 interface Props {
   product: Product;
   slug: string;
   currency: string;
-
 }
 
-export default function ProductDetails({ product,slug,currency, }: Props) {
-const {
-  items,
-  addToCart,
-  increaseQuantity,
-  decreaseQuantity,
-  setStoreSlug,
-  setCurrency,
-} = useCart();
+export default function ProductDetails({
+  product,
+  slug,
+  currency,
+}: Props) {
+  const {
+    addToCart,
+    setStoreSlug,
+    setCurrency,
+  } = useCart();
 
- const [showToast, setShowToast] = useState(false);
+  const minimumQuantity =
+    product.minimum_order_quantity ?? 1;
 
+  const [quantity, setQuantity] = useState(
+    minimumQuantity
+  );
 
-const cartItem = items.find(
-  (item) => item.id === product.id
-);
+  const [showToast, setShowToast] = useState(false);
 
-function handleAddToCart() {
-  // Remember which store the customer is shopping in
-  setStoreSlug(slug);
-  setCurrency(currency);
+  const canOrder =
+    product.stock >= minimumQuantity;
 
-  addToCart(product);
+  function decreaseQuantity() {
+    setQuantity((current) =>
+      Math.max(minimumQuantity, current - 1)
+    );
+  }
 
-  setShowToast(true);
+  function increaseQuantity() {
+    setQuantity((current) =>
+      Math.min(product.stock, current + 1)
+    );
+  }
 
-  setTimeout(() => {
-    setShowToast(false);
-  }, 5000);
-}
+  function handleAddToCart() {
+    if (!canOrder) return;
+
+    setStoreSlug(slug);
+    setCurrency(currency);
+
+    addToCart(product, quantity);
+
+    setShowToast(true);
+
+    setTimeout(() => {
+      setShowToast(false);
+    }, 5000);
+  }
+
   return (
     <div className="flex flex-col gap-5">
       <div>
@@ -53,8 +70,14 @@ function handleAddToCart() {
         </h1>
 
         <p className="mt-3 text-4xl font-bold text-emerald-600">
-         {formatCurrency(product.price, currency)}
+          {formatCurrency(product.price, currency)}
         </p>
+
+        {minimumQuantity > 1 && (
+          <p className="mt-2 text-sm text-gray-500">
+            Minimum order: {minimumQuantity} units
+          </p>
+        )}
       </div>
 
       <div>
@@ -69,6 +92,13 @@ function handleAddToCart() {
         )}
       </div>
 
+      {!canOrder && product.stock > 0 && (
+        <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">
+          Only {product.stock} available. The minimum order is{" "}
+          {minimumQuantity}.
+        </div>
+      )}
+
       {product.description && (
         <div>
           <h2 className="mb-2 text-base font-semibold text-gray-900">
@@ -81,63 +111,62 @@ function handleAddToCart() {
         </div>
       )}
 
-      <div className="mt-2 flex flex-col gap-3 sm:flex-row">
-{cartItem ? (
-  <div className="flex flex-1 items-center justify-between rounded-xl bg-emerald-600 px-4 py-3 text-white">
+      {canOrder && (
+        <div className="flex flex-col gap-3">
+          <div>
+            <p className="mb-2 text-sm font-medium text-gray-700">
+              Quantity
+            </p>
 
-    <button
-      onClick={() => decreaseQuantity(product.id)}
-      className="text-2xl font-bold"
-    >
-      −
-    </button>
+            <div className="flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3">
+              <button
+                type="button"
+                onClick={decreaseQuantity}
+                disabled={quantity <= minimumQuantity}
+                className="flex h-10 w-10 items-center justify-center rounded-lg border text-2xl font-bold transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                −
+              </button>
 
-    <span className="text-lg font-semibold">
-      {cartItem.quantity}
-    </span>
+              <div className="text-center">
+                <span className="text-xl font-semibold">
+                  {quantity}
+                </span>
 
-    <button
-      onClick={() => {
-        if (cartItem.quantity < product.stock) {
-          increaseQuantity(product.id);
-        }
-      }}
-      className="text-2xl font-bold"
-    >
-      +
-    </button>
+                {minimumQuantity > 1 && (
+                  <p className="text-xs text-gray-500">
+                    Minimum {minimumQuantity}
+                  </p>
+                )}
+              </div>
 
-  </div>
-) : (
-  <button
-    onClick={handleAddToCart}
-    disabled={product.stock === 0}
-    className="flex-1 rounded-xl bg-emerald-600 py-3.5 text-base font-medium text-white transition hover:bg-emerald-700 disabled:bg-gray-400"
-  >
-    🛒 Add to Cart
-  </button>
-)}
-        <button
-          disabled={product.stock === 0}
-          className="flex-1 rounded-xl border border-gray-300 bg-white py-3.5 text-base font-medium text-gray-900 transition hover:bg-gray-50"
-        >
-          ⚡ Buy Now
-        </button>
-      </div>
+              <button
+                type="button"
+                onClick={increaseQuantity}
+                disabled={quantity >= product.stock}
+                className="flex h-10 w-10 items-center justify-center rounded-lg border text-2xl font-bold transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                +
+              </button>
+            </div>
+          </div>
 
-      <Link
-        href="/cart"
-        className="text-center text-sm font-medium text-emerald-600 hover:underline"
-      >
-        View Cart →
-      </Link>
-<Toast
-  show={showToast}
-  title="Added to Cart"
-  message={product.name}
-  continueHref={`/store/${slug}`}
-/>
+          <button
+            type="button"
+            onClick={handleAddToCart}
+            className="w-full rounded-xl bg-emerald-600 py-3.5 text-base font-medium text-white transition hover:bg-emerald-700"
+          >
+            🛒 Add {quantity} to Cart
+          </button>
+        </div>
+      )}
+
+      <Toast
+        show={showToast}
+        title="Added to Cart"
+        message={`${quantity} × ${product.name}`}
+        continueHref={`/store/${slug}`}
+      />
     </div>
   );
 }
-

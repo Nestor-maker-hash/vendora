@@ -9,6 +9,8 @@ import { getBusinessBySlug } from "@/src/features/business/services/getBusinessB
 import { formatCurrency } from "@/src/utils/formatCurrency";
 import { PaymentMethod } from "@/src/features/orders/types/order";
 import { Business } from "@/src/features/business/types/business";
+import type { DeliveryZone } from "@/src/features/delivery/types/deliveryZone";
+import { getDeliveryZones } from "@/src/features/delivery/services/getDeliveryZones";
 
 export default function CheckoutPage() {
   const {
@@ -31,6 +33,10 @@ export default function CheckoutPage() {
   const [loading, setLoading] = useState(false);
   const [business, setBusiness] = useState<Business | null>(null);
 
+  const [deliveryZones, setDeliveryZones] = useState<DeliveryZone[]>([]);
+  const [deliveryZoneId, setDeliveryZoneId] = useState("");
+  const [deliveryLoading, setDeliveryLoading] = useState(false);
+
   useEffect(() => {
     if (!storeSlug) return;
 
@@ -41,10 +47,38 @@ export default function CheckoutPage() {
       } catch (error) {
         console.error(error);
       }
-    }
+0    }
 
     loadBusiness();
   }, [storeSlug]);
+
+  useEffect(() => {
+    if (!business?.id) return;
+
+    const businessId: string = business.id;
+
+    async function loadDeliveryZones() {
+      try {
+        setDeliveryLoading(true);
+
+        const zones = await getDeliveryZones(businessId);
+
+        setDeliveryZones(zones);
+
+        if (zones.length === 1) {
+          setDeliveryZoneId(zones[0].id);
+        }
+      } catch (error) {
+        console.error("Failed to load delivery zones:", error);
+      } finally {
+        setDeliveryLoading(false);
+      }
+    }
+
+    loadDeliveryZones();
+  }, [business?.id]);
+
+
 
   useEffect(() => {
     if (!business) return;
@@ -57,7 +91,7 @@ export default function CheckoutPage() {
     if (business.bank_transfer_enabled) {
       setPaymentMethod("bank_transfer");
       return;
-    }
+ 0   }
 
     if (business.online_payment_enabled) {
       setPaymentMethod("paystack");
@@ -69,7 +103,15 @@ export default function CheckoutPage() {
     0
   );
 
-  const deliveryFee = 0;
+  const selectedDeliveryZone = deliveryZones.find(
+  (zone) => zone.id === deliveryZoneId
+);
+
+const deliveryFee = selectedDeliveryZone
+  ? selectedDeliveryZone.free_delivery
+    ? 0
+    : Number(selectedDeliveryZone.price)
+  : 0;
 
   const total = subtotal + deliveryFee;
 
@@ -84,46 +126,47 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!deliveryZoneId) {
+  alert("Please select a delivery area.");
+  return;
+}
+
     setLoading(true);
 
     try {
-      // Temporarily log store metadata and cart items for validation
       console.log({
         storeSlug,
         businessId: items[0]?.business_id,
         items,
       });
 
-const response = await fetch("/api/orders", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    businessId: items[0].business_id,
-    customerName,
-    customerPhone,
-    customerEmail,
-    state,
-    city,
-    address,
-    notes,
-    deliveryFee,
-    paymentMethod,
-    items,
-  }),
-});
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          businessId: items[0].business_id,
+          customerName,
+          customerPhone,
+          customerEmail,
+          state,
+          city,
+          address,
+          notes,
+          deliveryZoneId: deliveryZoneId || null,
+          paymentMethod,
+          items,
+        }),
+      });
 
-const result = await response.json();
+      const result = await response.json();
 
-if (!response.ok || !result.success) {
-  throw new Error(
-    result.message ?? "Failed to create order."
-  );
-}
+      if (!response.ok || !result.success) {
+        throw new Error(result.message ?? "Failed to create order.");
+      }
 
-const order = result.order;
-
+      const order = result.order;
       const slug = storeSlug;
 
       clearCart();
@@ -139,7 +182,6 @@ const order = result.order;
       }
 
       router.push(`/payment/paystack?order=${order.id}`);
-
     } catch (error) {
       console.error(error);
 
@@ -162,33 +204,27 @@ const order = result.order;
 
   return (
     <>
-     {business && (
-  <StoreNavbar
-    business={business}
-    storeName="Checkout"
-    storeHref={storeSlug ? `/store/${storeSlug}` : "/"}
-  />
-)}
+      {business && (
+        <StoreNavbar
+          business={business}
+          storeName="Checkout"
+          storeHref={storeSlug ? `/store/${storeSlug}` : "/"}
+        />
+      )}
 
       <main className="min-h-screen bg-gray-50 py-8">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-3">
-
           {/* Customer Form */}
           <section className="rounded-2xl bg-white p-6 shadow-sm lg:col-span-2">
-
-            <h1 className="mb-8 text-3xl font-semibold">
-              Checkout
-            </h1>
+            <h1 className="mb-8 text-3xl font-semibold">Checkout</h1>
 
             <div className="space-y-6">
-
               <div>
                 <h2 className="mb-4 text-lg font-semibold">
                   Contact Information
                 </h2>
 
                 <div className="grid gap-4">
-
                   <input
                     value={customerName}
                     onChange={(e) => setCustomerName(e.target.value)}
@@ -216,25 +252,71 @@ const order = result.order;
                   Delivery Address
                 </h2>
                 <div className="grid gap-4">
-
                   <input
                     value={state}
                     onChange={(e) => setState(e.target.value)}
                     placeholder="State"
                     className="rounded-xl border p-3 outline-none focus:border-emerald-600"
                   />
-                  <input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="City"
-                    className="rounded-xl border p-3 outline-none focus:border-emerald-600"
-                  />
+                  <div>
+                    <input
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      placeholder="City"
+                      className="w-full rounded-xl border p-3 outline-none focus:border-emerald-600"
+                    />
+
+
+                  </div>
                   <input
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="pick up address"
+                    placeholder="Pick up address"
                     className="rounded-xl border p-3 outline-none focus:border-emerald-600"
                   />
+
+                  {deliveryZones.length > 0 && (
+                    <div>
+                      <label className="mb-1 block text-sm font-medium">
+                        Delivery Area
+                      </label>
+
+                      <select
+                        value={deliveryZoneId}
+                        onChange={(e) => setDeliveryZoneId(e.target.value)}
+                        disabled={deliveryLoading || loading}
+                        className="w-full rounded-xl border p-3 outline-none focus:border-emerald-600 disabled:bg-gray-100"
+                      >
+                        <option value="">
+                          {deliveryLoading
+                            ? "Loading delivery locations..."
+                            : "Select delivery location"}
+				Select delivery area
+                        </option>
+
+                        {deliveryZones.map((zone) => (
+                          <option key={zone.id} value={zone.id}>
+                            {zone.location} —{" "}
+                            {zone.free_delivery
+                              ? "FREE DELIVERY"
+                              : formatCurrency(zone.price, currency)}
+                          </option>
+                        ))}
+                      </select>
+
+                      {selectedDeliveryZone && (
+                        <p className="mt-2 text-sm text-gray-500">
+                          {selectedDeliveryZone.free_delivery
+                            ? "Free delivery to this location."
+                            : `Delivery fee: ${formatCurrency(
+                                selectedDeliveryZone.price,
+                                currency
+                              )}`}
+                        </p>
+                      )}
+                    </div>
+                  )}
+
                   <textarea
                     rows={4}
                     value={notes}
@@ -251,9 +333,8 @@ const order = result.order;
                 </h2>
 
                 <div className="space-y-3">
-
                   {business?.pay_on_delivery_enabled && (
-                    <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer">
+                    <label className="flex cursor-pointer items-center gap-3 rounded-xl border p-4">
                       <input
                         type="radio"
                         checked={paymentMethod === "pay_on_delivery"}
@@ -269,7 +350,7 @@ const order = result.order;
                   )}
 
                   {business?.bank_transfer_enabled && (
-                    <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer">
+                    <label className="flex cursor-pointer items-center gap-3 rounded-xl border p-4">
                       <input
                         type="radio"
                         checked={paymentMethod === "bank_transfer"}
@@ -285,7 +366,7 @@ const order = result.order;
                   )}
 
                   {business?.online_payment_enabled && (
-                    <label className="flex items-center gap-3 rounded-xl border p-4 cursor-pointer">
+                    <label className="flex cursor-pointer items-center gap-3 rounded-xl border p-4">
                       <input
                         type="radio"
                         checked={paymentMethod === "paystack"}
@@ -299,32 +380,22 @@ const order = result.order;
                       </div>
                     </label>
                   )}
-
                 </div>
               </div>
-
             </div>
-
           </section>
 
           {/* Order Summary */}
           <aside className="h-fit rounded-2xl bg-white p-6 shadow-sm">
-
             <h2 className="mb-6 text-xl font-semibold">
               Order Summary
             </h2>
 
             <div className="space-y-4">
-
               {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between"
-                >
+                <div key={item.id} className="flex justify-between">
                   <div>
-                    <p className="font-medium">
-                      {item.name}
-                    </p>
+                    <p className="font-medium">{item.name}</p>
                     <p className="text-sm text-gray-500">
                       Qty {item.quantity}
                     </p>
@@ -335,24 +406,23 @@ const order = result.order;
                   </p>
                 </div>
               ))}
-
             </div>
 
             <div className="my-6 border-t" />
 
             <div className="space-y-3">
-
               <div className="flex justify-between">
                 <span>Subtotal</span>
-                <span>
-                  {formatCurrency(subtotal, currency)}
-                </span>
+                <span>{formatCurrency(subtotal, currency)}</span>
               </div>
 
               <div className="flex justify-between">
                 <span>Delivery</span>
                 <span>
-                  {formatCurrency(deliveryFee, currency)}
+                  {deliveryFee === 0 &&
+                     selectedDeliveryZone?.free_delivery
+                    ? "FREE"
+                    : formatCurrency(deliveryFee, currency)}
                 </span>
               </div>
 
@@ -363,21 +433,22 @@ const order = result.order;
                   {formatCurrency(total, currency)}
                 </span>
               </div>
-
             </div>
 
             <button
               onClick={handleCheckout}
-              disabled={loading || items.length === 0}
+              disabled={
+                loading ||
+                items.length === 0 ||
+                (deliveryZones.length > 0 && !deliveryZoneId)
+              }
               className="mt-8 w-full rounded-xl bg-emerald-600 py-4 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-gray-400"
             >
               {loading ? "Please wait..." : buttonText}
             </button>
           </aside>
-
         </div>
       </main>
     </>
   );
 }
-
