@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/currency/sync-rates",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

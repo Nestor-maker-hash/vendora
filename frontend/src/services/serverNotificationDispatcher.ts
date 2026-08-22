@@ -8,12 +8,13 @@ import {
 import { getNotificationSettingsServer } from "@/src/features/settings/services/getNotificationSettingsServer";
 import { NotificationType } from "@/src/features/notifications/constants/notificationTypes";
 import { WhatsAppTemplatePayload } from "@/src/features/notifications/types/whatsapp";
+import { sendPushNotification } from "@/src/services/push/pushService";
 
 interface DispatchNotificationData {
   businessId: string;
   title: string;
   message: string;
- whatsapp?: WhatsAppTemplatePayload;
+  whatsapp?: WhatsAppTemplatePayload;
   whatsappMessage?: string;
   type: NotificationType;
   link?: string;
@@ -22,37 +23,41 @@ interface DispatchNotificationData {
 export async function dispatchNotificationServer(
   data: DispatchNotificationData
 ) {
+  // Always create the in-app notification.
   await createNotification(data);
 
   try {
-    const business = await getBusinessByIdServer(data.businessId);
+    const business = await getBusinessByIdServer(
+      data.businessId
+    );
 
     const settings =
       await getNotificationSettingsServer(
         data.businessId
       );
 
-	const shouldSendWhatsApp =
-  data.type === NotificationType.LOW_STOCK
-    ? settings.low_stock_alerts
-    : settings.whatsapp_orders;
+    // WhatsApp
+    const shouldSendWhatsApp =
+      data.type === NotificationType.LOW_STOCK
+        ? settings.low_stock_alerts
+        : settings.whatsapp_orders;
 
-
-    if (
-      shouldSendWhatsApp &&
-      business.phone
-    ) {
+    if (shouldSendWhatsApp && business.phone) {
       if (data.whatsapp) {
-const templateData: WhatsAppTemplateMessage = {
-  to: business.phone,
-  template: data.whatsapp.template,
-variables: [
-  business.name,
-  ...data.whatsapp.variables,
-],
-  buttonVariables: data.whatsapp.buttonVariables,
-};
-        await sendWhatsAppTemplate(templateData);
+        const templateData: WhatsAppTemplateMessage = {
+          to: business.phone,
+          template: data.whatsapp.template,
+          variables: [
+            business.name,
+            ...data.whatsapp.variables,
+          ],
+          buttonVariables:
+            data.whatsapp.buttonVariables,
+        };
+
+        await sendWhatsAppTemplate(
+          templateData
+        );
       } else {
         await sendWhatsApp({
           to: business.phone,
@@ -62,8 +67,23 @@ variables: [
         });
       }
     }
-  } catch (err) {
-    console.error(err);
+
+    // Web Push
+    if (settings.browser_notifications) {
+      await sendPushNotification({
+        businessId: data.businessId,
+        title: data.title,
+        body: data.message,
+        url:
+          data.link ??
+          "/dashboard/notifications",
+        type: data.type,
+      });
+    }
+  } catch (error) {
+    console.error(
+      "Notification delivery failed:",
+      error
+    );
   }
 }
-

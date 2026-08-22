@@ -22,12 +22,16 @@ interface Props {
   slug: string;
   business: Business;
   products: Product[];
+  productLimit: number | null;
+  lockOverLimitProducts: boolean;
 }
 
 export default function StorePageClient({
   slug,
   business,
   products,
+  productLimit,
+  lockOverLimitProducts,
 }: Props) {
   const [search, setSearch] = useState("");
 
@@ -99,12 +103,17 @@ export default function StorePageClient({
 
 </header>
 
-          <StoreProducts
-            slug={slug}
-            products={products}
-            search={search}
-	    currency={business.currency}
-          />
+       <StoreProducts
+  slug={slug}
+  products={products}
+  search={search}
+  currency={business.currency}
+  productLimit={productLimit}
+  lockOverLimitProducts={
+    lockOverLimitProducts
+  }
+/>
+
         </div>
       </main>
     </>

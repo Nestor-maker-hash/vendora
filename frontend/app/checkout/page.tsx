@@ -47,7 +47,7 @@ export default function CheckoutPage() {
       } catch (error) {
         console.error(error);
       }
-0    }
+    }
 
     loadBusiness();
   }, [storeSlug]);
@@ -134,9 +134,16 @@ const deliveryFee = selectedDeliveryZone
     setLoading(true);
 
     try {
-      console.log({
+      console.log("CHECKOUT DELIVERY DEBUG:", {
         storeSlug,
         businessId: items[0]?.business_id,
+        deliveryZoneId,
+        deliveryZones: deliveryZones.map((zone) => ({
+          id: zone.id,
+          business_id: zone.business_id,
+          location: zone.location,
+        })),
+        selectedDeliveryZone,
         items,
       });
 
@@ -177,7 +184,7 @@ const deliveryFee = selectedDeliveryZone
       }
 
       if (paymentMethod === "bank_transfer") {
-        router.push(`/payment/bank-transfer?order=${order.id}`);
+	router.push(`/payment/bank-transfer?token=${order.public_token}`);
         return;
       }
 

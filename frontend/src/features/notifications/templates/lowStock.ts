@@ -2,8 +2,7 @@ import { WhatsAppTemplatePayload } from "../types/whatsapp";
 
 export function lowStockTemplate(
   productName: string,
-  stock: number,
-  productId: string
+  stock: number
 ): {
   title: string;
   message: string;
@@ -20,10 +19,6 @@ export function lowStockTemplate(
       variables: [
         productName,
         String(stock),
-      ],
-
-      buttonVariables: [
-        productId,
       ],
     },
   };

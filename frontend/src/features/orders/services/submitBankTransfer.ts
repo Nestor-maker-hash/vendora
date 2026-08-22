@@ -1,28 +1,26 @@
-import { supabase } from "@/src/lib/supabase";
+import { Order } from "../types/order";
 
-import { getOrderById } from "./getOrderById";
+export async function submitBankTransfer(
+  token: string
+): Promise<Partial<Order>> {
+  const response = await fetch(
+    `/api/orders/public/${token}/submit-payment`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
-export async function submitBankTransfer(orderId: string) {
-  const { error } = await supabase
-    .from("orders")
-    .update({
-      payment_submitted_at: new Date().toISOString(),
-    })
-    .eq("id", orderId);
+  const result = await response.json();
 
-  if (error) {
-    throw error;
+  if (!response.ok || !result.success) {
+    throw new Error(
+      result.message ??
+        "Failed to submit payment."
+    );
   }
 
-  const order = await getOrderById(orderId);
-
-  await fetch("/api/payment-submitted", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    orderId,
-  }),
-});
+  return result;
 }

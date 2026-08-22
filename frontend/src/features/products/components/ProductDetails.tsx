@@ -10,12 +10,14 @@ interface Props {
   product: Product;
   slug: string;
   currency: string;
+  isLocked?: boolean;
 }
 
 export default function ProductDetails({
   product,
   slug,
   currency,
+  isLocked = false,
 }: Props) {
   const {
     addToCart,
@@ -33,6 +35,7 @@ export default function ProductDetails({
   const [showToast, setShowToast] = useState(false);
 
   const canOrder =
+    !isLocked &&
     product.stock >= minimumQuantity;
 
   function decreaseQuantity() {
@@ -68,6 +71,18 @@ export default function ProductDetails({
         <h1 className="text-3xl font-semibold text-gray-900">
           {product.name}
         </h1>
+
+        {isLocked && (
+          <div className="mt-3 rounded-xl bg-gray-100 p-3 text-sm font-medium text-gray-600">
+            This product is currently unavailable.
+          </div>
+        )}
+
+        {isLocked && (
+          <div className="mt-3 rounded-xl bg-gray-100 p-3 text-sm font-medium text-gray-600">
+            This product is currently unavailable.
+          </div>
+        )}
 
         <p className="mt-3 text-4xl font-bold text-emerald-600">
           {formatCurrency(product.price, currency)}

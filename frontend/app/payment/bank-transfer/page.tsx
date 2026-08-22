@@ -3,7 +3,6 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
-import { getOrderById } from "@/src/features/orders/services/getOrderById";
 import { submitBankTransfer } from "@/src/features/orders/services/submitBankTransfer";
 import { Order } from "@/src/features/orders/types/order";
 import { formatCurrency } from "@/src/utils/formatCurrency";
@@ -19,22 +18,35 @@ type BankTransferOrder = Order & {
 
 function BankTransferContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get("order");
-
+  const token = searchParams.get("token");
   const [order, setOrder] = useState<BankTransferOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadOrder() {
-      if (!orderId) {
+     if (!token) {
         setLoading(false);
         return;
       }
 
       try {
-        const data = (await getOrderById(orderId)) as BankTransferOrder;
-        setOrder(data);
+
+const response = await fetch(
+  `/api/orders/public/${token}`
+);
+
+const result = await response.json();
+
+if (!response.ok || !result.success) {
+  throw new Error(
+    result.message ?? "Failed to load order."
+  );
+}
+
+setOrder(result.order as BankTransferOrder);
+
+
       } catch (error) {
         console.error(error);
       } finally {
@@ -43,7 +55,7 @@ function BankTransferContent() {
     }
 
     loadOrder();
-  }, [orderId]);
+ }, [token]);
 
   async function copyAccountNumber() {
     if (!order?.business.account_number) return;
@@ -64,7 +76,7 @@ function BankTransferContent() {
     try {
       setSubmitting(true);
 
-      await submitBankTransfer(order.id);
+	await submitBankTransfer(order.public_token);
 
       toast.success(
         "Payment submitted successfully. The merchant will verify it shortly.",

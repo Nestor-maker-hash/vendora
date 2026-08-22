@@ -9,7 +9,9 @@ import { useState } from "react";
 import { formatCurrency } from "@/src/utils/formatCurrency";
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & {
+    locked?: boolean;
+  };
 
   mode?: "dashboard" | "store";
   currency: string;
@@ -18,6 +20,8 @@ interface ProductCardProps {
 
   onEdit?: () => void;
   onDelete?: () => void;
+
+  isLocked?: boolean;
 }
 
 export default function ProductCard({
@@ -27,6 +31,7 @@ export default function ProductCard({
   href,
   onEdit,
   onDelete,
+  isLocked = false,
 }: ProductCardProps) {
   const {
     addToCart,
@@ -36,7 +41,7 @@ export default function ProductCard({
   const [showToast, setShowToast] = useState(false);
 
   function handleAddToCart() {
-    if (!href) return;
+    if (!href || isLocked) return;
 
     // Assumes href follows a format like "/store/slug-name/..."
     const slug = href.split("/")[2];
@@ -52,7 +57,21 @@ export default function ProductCard({
 
   const card =
     mode === "store" ? (
-      <div className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+      <div
+        className={`relative overflow-hidden rounded-xl border bg-white shadow-sm transition ${
+          isLocked
+            ? "opacity-50 grayscale"
+            : "hover:shadow-md"
+        }`}
+      >
+        {isLocked && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20">
+            <span className="rounded-full bg-gray-900 px-3 py-1.5 text-xs font-semibold text-white">
+              Currently unavailable
+            </span>
+          </div>
+        )}
+
         <div className="aspect-square bg-gray-100">
           {product.image_url ? (
             <img
@@ -90,7 +109,9 @@ export default function ProductCard({
                   : "bg-red-100 text-red-700"
               }`}
             >
-              {product.stock > 0 ? `${product.stock} left` : "Sold Out"}
+              {product.stock > 0
+                ? `${product.stock} left`
+                : "Sold Out"}
             </span>
           </div>
 
@@ -107,9 +128,13 @@ export default function ProductCard({
               handleAddToCart();
             }}
             className="mt-2 w-full rounded-lg py-2 text-sm"
-            disabled={product.stock === 0}
+            disabled={product.stock === 0 || isLocked}
           >
-            {product.stock > 0 ? "Add to Cart" : "Sold Out"}
+            {isLocked
+              ? "Unavailable"
+              : product.stock > 0
+              ? "Add to Cart"
+              : "Sold Out"}
           </Button>
         </div>
       </div>
@@ -181,7 +206,10 @@ export default function ProductCard({
       </div>
     );
 
-  const finalCard = href ? <Link href={href}>{card}</Link> : card;
+  const finalCard =
+    href && !isLocked
+      ? <Link href={href}>{card}</Link>
+      : card;
 
   return (
     <>
@@ -195,4 +223,5 @@ export default function ProductCard({
     </>
   );
 }
+
 

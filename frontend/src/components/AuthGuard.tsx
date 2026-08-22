@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { supabase } from "@/src/lib/supabase";
 import { getBusinessAfterLogin } from "@/src/features/auth/services/getBusinessAfterLogin";
+import { getCurrentUserRole } from "@/src/features/auth/services/getCurrentUserRole";
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -18,43 +19,58 @@ export default function AuthGuard({
 
   useEffect(() => {
     async function checkUser() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      // Not logged in
-      if (!session) {
+        if (!session) {
+          router.replace("/login");
+          return;
+        }
+
+        const role = await getCurrentUserRole(
+          session.user.id
+        );
+
+        if (role === "super_admin") {
+          router.replace("/immortal");
+          return;
+        }
+
+        const business = await getBusinessAfterLogin(
+          session.user.id
+        );
+
+        const currentPath =
+          window.location.pathname;
+
+        if (
+          (!business || !business.currency) &&
+          currentPath !== "/onboarding"
+        ) {
+          router.replace("/onboarding");
+          return;
+        }
+
+        if (
+          business &&
+          business.currency &&
+          currentPath === "/onboarding"
+        ) {
+          router.replace("/dashboard");
+          return;
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error(
+          "AuthGuard error:",
+          error
+        );
+
         router.replace("/login");
-        return;
       }
-
-      // Check if merchant has a business
-      const business = await getBusinessAfterLogin(
-        session.user.id
-      );
-
-      const currentPath = window.location.pathname;
-
-      // Logged in but hasn't completed onboarding
-if (
-  (!business || !business.currency) &&
-  currentPath !== "/onboarding"
-) {
-  router.replace("/onboarding");
-  return;
-}
-
-// Already completed onboarding but somehow visits onboarding
-if (
-  business &&
-  business.currency &&
-  currentPath === "/onboarding"
-) {
-  router.replace("/dashboard");
-  return;
-}
-
-      setLoading(false);
     }
 
     checkUser();

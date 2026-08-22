@@ -1,5 +1,6 @@
 import { supabase } from "@/src/lib/supabase";
 import { Product } from "../types/product";
+import { checkSubscriptionLimit } from "@/src/features/subscriptions/services/checkSubscriptionLimit";
 
 interface CreateProductInput {
   name: string;
@@ -30,6 +31,28 @@ export async function createProduct(
 
   if (businessError || !business) {
     throw new Error("Business not found");
+  }
+
+  const { count: productCount, error: productCountError } =
+    await supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", business.id);
+
+  if (productCountError) {
+    throw productCountError;
+  }
+
+  const productLimit = await checkSubscriptionLimit(
+    business.id,
+    "max_products",
+    productCount ?? 0
+  );
+
+  if (!productLimit.allowed) {
+    throw new Error(
+      `You've reached the ${productLimit.planName} plan limit of ${productLimit.limit} products. Upgrade your plan to add more products.`
+    );
   }
 
   const minimumOrderQuantity =

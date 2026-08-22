@@ -3,6 +3,7 @@ export const NotificationType = {
   PAYMENT_SUBMITTED: "payment_submitted",
   WELCOME: "welcome",
   LOW_STOCK: "low_stock",
+  BROADCAST: "broadcast",
 } as const;
 
 export type NotificationType =

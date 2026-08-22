@@ -1,14 +1,21 @@
 "use client";
 
 import { useMemo } from "react";
+
 import ProductCard from "@/src/features/products/components/ProductCard";
 import type { Product } from "@/src/features/products/types/product";
+
+type StorefrontProduct = Product & {
+  isLocked: boolean;
+};
 
 interface Props {
   slug: string;
   products: Product[];
   search: string;
   currency: string;
+  productLimit: number | null;
+  lockOverLimitProducts: boolean;
 }
 
 export default function StoreProducts({
@@ -16,26 +23,38 @@ export default function StoreProducts({
   products,
   search,
   currency,
+  productLimit,
+  lockOverLimitProducts,
 }: Props) {
+  const storefrontProducts = useMemo<StorefrontProduct[]>(() => {
+    return products.map((product, index) => ({
+      ...product,
+      isLocked:
+        lockOverLimitProducts &&
+        productLimit !== null &&
+        index >= productLimit,
+    }));
+  }, [
+    products,
+    productLimit,
+    lockOverLimitProducts,
+  ]);
 
   const filteredProducts = useMemo(() => {
-const q = (search ?? "").toLowerCase().trim();
+    const q = (search ?? "").toLowerCase().trim();
 
-    if (!q) return products;
+    if (!q) return storefrontProducts;
 
-    return products.filter((product) => {
+    return storefrontProducts.filter((product) => {
       return (
         product.name.toLowerCase().includes(q) ||
         product.description?.toLowerCase().includes(q)
       );
     });
-  }, [products, search]);
+  }, [storefrontProducts, search]);
 
   return (
     <>
-
-
-
       {filteredProducts.length === 0 ? (
         <div className="rounded-xl border bg-white p-10 text-center">
           <h2 className="text-xl font-semibold">
@@ -53,8 +72,9 @@ const q = (search ?? "").toLowerCase().trim();
               key={product.id}
               product={product}
               mode="store"
-	      currency={currency}
+              currency={currency}
               href={`/store/${slug}/product/${product.id}`}
+              isLocked={product.isLocked}
             />
           ))}
         </div>

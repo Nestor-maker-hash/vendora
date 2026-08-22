@@ -1,15 +1,17 @@
 import { supabaseServer } from "@/src/lib/supabaseServer";
-import { supabase } from "@/src/lib/supabase";
 import { CartItem } from "@/src/features/cart/types/cart";
 import { OrderItem } from "../types/orderItem";
 import { notifyMerchant } from "@/src/features/notifications/services/notifyMerchant";
 import { getProductById } from "@/src/features/products/services/getProductById";
 import { getBusinessById } from "@/src/features/business/services/getBusinessById";
 import { updateProductStock } from "@/src/features/products/services/updateProductStock";
+import { checkSubscriptionLimit } from "@/src/features/subscriptions/services/checkSubscriptionLimit";
+import { getStorefrontProductAccess } from "@/src/features/subscriptions/services/getStorefrontProductAccess";
 import {
   Order,
   PaymentMethod,
 } from "../types/order";
+import { isStorefrontProductLocked } from "@/src/features/subscriptions/services/isStorefrontProductLocked";
 
 interface CheckoutData {
   businessId: string;
@@ -35,6 +37,29 @@ export async function createOrder(
  // Validate each product before creating the order
 for (const item of data.items) {
   const product = await getProductById(item.id);
+  
+const locked = await isStorefrontProductLocked(
+  data.businessId,
+  item.id
+);
+
+if (locked) {
+  throw new Error(
+    `${product.name} is currently unavailable for purchase.`
+  );
+}
+
+  const productAccess =
+    await getStorefrontProductAccess(
+      data.businessId,
+      item.id
+    );
+
+  if (!productAccess.allowed) {
+    throw new Error(
+      `${product.name} is currently unavailable.`
+    );
+  }
 
   const minimumOrderQuantity =
     product.minimum_order_quantity ?? 1;
@@ -84,7 +109,89 @@ const deliveryFee = deliveryZone.free_delivery
 
   const total = subtotal + deliveryFee;
 
-  const { data: order, error } = await supabase
+  // Enforce the merchant's monthly order limit.
+  // Orders created during the current UTC calendar month count
+  // toward the plan limit regardless of payment/status.
+  const now = new Date();
+
+  const monthStart = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      1
+    )
+  ).toISOString();
+
+  const { count: monthlyOrderCount, error: orderCountError } =
+    await supabaseServer
+      .from("orders")
+      .select("id", { count: "exact", head: true })
+      .eq("business_id", data.businessId)
+      .gte("created_at", monthStart);
+
+  if (orderCountError) {
+    throw orderCountError;
+  }
+
+  const orderLimit = await checkSubscriptionLimit(
+    data.businessId,
+    "max_orders_per_month",
+    monthlyOrderCount ?? 0
+  );
+
+  if (!orderLimit.allowed) {
+    throw new Error(
+      `You've reached the ${orderLimit.planName} plan limit of ${orderLimit.limit} orders this month. Upgrade your plan to continue accepting orders.`
+    );
+  }
+
+  // Customers are identified by phone number.
+  // Existing customers can continue ordering; only a new
+  // unique customer consumes a customer slot.
+  const { data: existingCustomer, error: existingCustomerError } =
+    await supabaseServer
+      .from("orders")
+      .select("id")
+      .eq("business_id", data.businessId)
+      .eq("customer_phone", data.customerPhone)
+      .limit(1)
+      .maybeSingle();
+
+  if (existingCustomerError) {
+    throw existingCustomerError;
+  }
+
+  if (!existingCustomer) {
+    const { data: customerRows, error: customerCountError } =
+      await supabaseServer
+        .from("orders")
+        .select("customer_phone")
+        .eq("business_id", data.businessId);
+
+    if (customerCountError) {
+      throw customerCountError;
+    }
+
+    const uniqueCustomerCount = new Set(
+      (customerRows ?? [])
+        .map((row) => row.customer_phone)
+        .filter(Boolean)
+    ).size;
+
+    const customerLimit = await checkSubscriptionLimit(
+      data.businessId,
+      "max_customers",
+      uniqueCustomerCount
+    );
+
+    if (!customerLimit.allowed) {
+      throw new Error(
+        `You've reached the ${customerLimit.planName} plan limit of ${customerLimit.limit} customers. Upgrade your plan to accept orders from new customers.`
+      );
+    }
+  }
+
+  const { data: order, error } = await supabaseServer
     .from("orders")
     .insert({
       business_id: data.businessId,
@@ -127,7 +234,7 @@ const deliveryFee = deliveryZone.free_delivery
     quantity: item.quantity,
   }));
 
-  const { error: itemsError } = await supabase
+  const { error: itemsError } = await supabaseServer
     .from("order_items")
     .insert(orderItems);
 

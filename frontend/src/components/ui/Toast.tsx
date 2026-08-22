@@ -6,14 +6,14 @@ interface Props {
   show: boolean;
   title: string;
   message?: string;
-  continueHref: string;
+  continueHref?: string;
 }
 
 export default function Toast({
   show,
   title,
   message,
-  continueHref,
+  continueHref = "/checkout",
 }: Props) {
   return (
     <div
@@ -50,7 +50,7 @@ export default function Toast({
         </Link>
 
 	<Link
-  href="/checkout"
+  href={continueHref}
   className="rounded-xl border px-5 py-3 text-center font-medium text-gray-700 transition hover:bg-gray-100"
 >
   Proceed to checkout

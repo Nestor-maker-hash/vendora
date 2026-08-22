@@ -13,7 +13,7 @@ import {
 } from "../types/subscription";
 
 export function useSubscription() {
-  const { business } = useBusiness();
+  const { business, currency } = useBusiness();
 
   const [plans, setPlans] = useState<
     SubscriptionPlan[]
@@ -55,6 +55,8 @@ export function useSubscription() {
   return {
     plans,
     subscription,
+    business,
+    currency,
     loading,
   };
 }

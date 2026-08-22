@@ -161,7 +161,7 @@ if (showVerificationScreen) {
         </p>
 
         <p className="mt-4 text-sm text-gray-400">
-          If you don't see the email, check your Spam or Promotions folder.
+          If you don&apos;t see the email, check your Spam or Promotions folder.
         </p>
 
         <Link

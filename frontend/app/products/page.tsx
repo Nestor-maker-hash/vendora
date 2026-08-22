@@ -10,13 +10,7 @@ import { useDeleteProduct } from "@/src/features/products/hooks/useDeleteProduct
 import { useBusiness } from "@/src/features/business/hooks/useBusiness";
 
 export default function ProductsPage() {
- const {
-  products,
-  loading,
-  error,
-  refetch,
-  setProducts,
-} = useProducts();
+ const { products, loading, error, setProducts } = useProducts();
 
   const router = useRouter();
   const { removeProduct } = useDeleteProduct();

@@ -97,28 +97,32 @@ export async function sendWhatsAppTemplate(
             code: "en_US",
           },
          components: [
-  {
-    type: "body",
-    parameters: data.variables.map((value) => ({
-      type: "text",
-      text: value,
-    })),
-  },
+    ...(data.variables.length > 0
+      ? [
+          {
+            type: "body",
+            parameters: data.variables.map((value) => ({
+              type: "text",
+              text: value,
+            })),
+          },
+        ]
+      : []),
 
-  ...(data.buttonVariables
-    ? [
-        {
-          type: "button",
-          sub_type: "url",
-          index: "0",
-          parameters: data.buttonVariables.map((value) => ({
-            type: "text",
-            text: value,
-          })),
-        },
-      ]
-    : []),
-],
+    ...(data.buttonVariables?.length
+      ? [
+          {
+            type: "button",
+            sub_type: "url",
+            index: "0",
+            parameters: data.buttonVariables.map((value) => ({
+              type: "text",
+              text: value,
+            })),
+          },
+        ]
+      : []),
+  ],
         },
       }),
     }

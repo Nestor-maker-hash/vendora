@@ -8,6 +8,7 @@ import { login } from "../services/login";
 import { getBusinessAfterLogin } from "../services/getBusinessAfterLogin";
 import { resendVerificationEmail } from "../services/resendVerificationEmail";
 import { loginWithGoogle } from "../services/loginWithGoogle";
+import { getCurrentUserRole } from "../services/getCurrentUserRole";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -60,48 +61,55 @@ export default function LoginForm() {
 }
 
 
-  async function handleLogin() {
-    if (!email || !password) {
-      toast.error("Please fill in all fields.");
+ async function handleLogin() {
+  if (!email || !password) {
+    toast.error("Please fill in all fields.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    const user = await login(email, password);
+
+    const role = await getCurrentUserRole(user.id);
+
+    toast.success("Welcome back!");
+
+    if (role === "super_admin") {
+      router.replace("/immortal");
       return;
     }
 
-    try {
-      setLoading(true);
+    const business = await getBusinessAfterLogin(user.id);
 
-      const user = await login(email, password);
-
-      const business = await getBusinessAfterLogin(user.id);
-
-      toast.success("Welcome back!");
-
-      if (business) {
-        router.push("/dashboard");
-      } else {
-        router.push("/onboarding");
-      }
-    } catch (err: any) {
-      const message = err?.message?.toLowerCase() ?? "";
-
-      if (
-        message.includes("email not confirmed") ||
-        message.includes("email not verified")
-      ) {
-        toast(
-          "📧 Please verify your email before signing in. Check your inbox or Spam folder.",
-          {
-            duration: 4000,
-          }
-        );
-
-        setShowResendVerification(true);
-      } else {
-        toast.error(err.message ?? "Login failed.");
-      }
-    } finally {
-      setLoading(false);
+    if (business) {
+      router.replace("/dashboard");
+    } else {
+      router.replace("/onboarding");
     }
+  } catch (err: any) {
+    const message = err?.message?.toLowerCase() ?? "";
+
+    if (
+      message.includes("email not confirmed") ||
+      message.includes("email not verified")
+    ) {
+      toast(
+        "📧 Please verify your email before signing in. Check your inbox or Spam folder.",
+        {
+          duration: 4000,
+        }
+      );
+
+      setShowResendVerification(true);
+    } else {
+      toast.error(err?.message ?? "Login failed.");
+    }
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <main className="min-h-screen grid lg:grid-cols-2">

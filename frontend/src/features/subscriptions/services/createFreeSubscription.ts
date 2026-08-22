@@ -10,7 +10,11 @@ export async function createFreeSubscription(
       .eq("name", "Free")
       .single();
 
-  if (planError) throw planError;
+  if (planError || !plan) {
+    throw new Error("Free subscription plan not found.");
+  }
+
+  const now = new Date().toISOString();
 
   const { error } = await supabase
     .from("business_subscriptions")
@@ -18,6 +22,8 @@ export async function createFreeSubscription(
       business_id: businessId,
       plan_id: plan.id,
       status: "active",
+      started_at: now,
+      expires_at: null,
     });
 
   if (error) throw error;

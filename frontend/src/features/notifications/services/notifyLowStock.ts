@@ -12,8 +12,7 @@ export async function notifyLowStock(
  
 const notification = lowStockTemplate(
   productName,
-  stock,
-  productId
+  stock
 );
 
   await dispatchNotificationServer({

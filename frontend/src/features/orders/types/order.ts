@@ -19,6 +19,7 @@ export type OrderStatus =
 
 export interface Order {
   id: string;
+  public_token: string;
   business_id: string;
 
   customer_name: string;
