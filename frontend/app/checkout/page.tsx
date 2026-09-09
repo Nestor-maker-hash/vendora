@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { useCart } from "@/src/features/cart/context/CartContext";
@@ -25,7 +25,7 @@ type BuyerAddress = {
 import { supabase } from "@/src/lib/supabase";
 import { loginWithGoogle } from "@/src/features/auth/services/loginWithGoogle";
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const {
     items,
     getItemsForBusiness,
@@ -751,5 +751,13 @@ const deliveryFee = selectedDeliveryZone
         </div>
       </main>
     </>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
