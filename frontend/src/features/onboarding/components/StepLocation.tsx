@@ -56,7 +56,7 @@ export default function StepLocation({
 
       await finishOnboarding(data);
 
-      router.push("/dashboard");
+      router.push("/onboarding/setup");
     } catch (err) {
       console.error(err);
 

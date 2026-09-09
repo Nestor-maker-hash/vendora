@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { useCreateProduct } from "../hooks/useCreateProduct";
 import { uploadProductImage } from "../services/uploadProductImage";
@@ -24,6 +25,8 @@ interface ProductFormProps {
 
 export default function ProductForm({ initialValues, productId }: ProductFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const isSetupFlow = searchParams.get("setup") === "true";
   const { addProduct, loading: creating } = useCreateProduct();
   const [updating, setUpdating] = useState(false);
 
@@ -80,7 +83,7 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
         await addProduct(payload);
       }
 
-      router.push("/products");
+      router.push(isSetupFlow ? "/settings?section=delivery&setup=true" : "/products");
     } catch (error) {
       console.error(error);
       if (error instanceof Error) {

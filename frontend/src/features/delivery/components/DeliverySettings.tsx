@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import toast from "react-hot-toast";
 
 import { useBusiness } from "@/src/features/business/hooks/useBusiness";
@@ -11,6 +12,10 @@ import { deleteDeliveryZone } from "../services/deleteDeliveryZone";
 import type { DeliveryZone } from "../types/deliveryZone";
 
 export default function DeliverySettings() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isSetupFlow = searchParams.get("setup") === "true";
+
   const { business, loading: businessLoading } = useBusiness();
 
   const [zones, setZones] = useState<DeliveryZone[]>([]);
@@ -114,6 +119,10 @@ export default function DeliverySettings() {
       }
 
       resetForm();
+
+      if (isSetupFlow) {
+        router.push("/settings?section=payments&setup=true");
+      }
     } catch (error) {
       console.error(error);
 

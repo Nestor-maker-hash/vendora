@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useBusiness } from "@/src/features/business/hooks/useBusiness";
 import { updateBusiness } from "@/src/features/business/services/updateBusiness";
 import toast from "react-hot-toast";
@@ -11,6 +12,10 @@ interface PaystackBank {
 }
 
 export default function PaymentSettings() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const isSetupFlow = searchParams.get("setup") === "true";
+
   const { business, loading } = useBusiness();
 
   const [currency, setCurrency] = useState("");
@@ -225,6 +230,10 @@ export default function PaymentSettings() {
       });
 
       toast.success("Payment settings saved");
+
+      if (isSetupFlow) {
+        router.push("/dashboard");
+      }
     } catch (err) {
       console.error(err);
       toast.error("Failed to save payment settings");
