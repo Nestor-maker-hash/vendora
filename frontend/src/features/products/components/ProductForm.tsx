@@ -1,5 +1,4 @@
 "use client";
-
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCreateProduct } from "../hooks/useCreateProduct";
@@ -11,14 +10,15 @@ import toast from "react-hot-toast";
 
 // Step 1: Component Interface Definition
 interface ProductFormProps {
- initialValues?: {
-  name: string;
-  description?: string | null;
-  price: number;
-  stock: number;
-  minimum_order_quantity?: number;
-  image_url?: string | null;
-};
+  initialValues?: {
+    name: string;
+    description?: string | null;
+    price: number;
+    merchant_price?: number | null;
+    stock: number;
+    minimum_order_quantity?: number;
+    image_url?: string | null;
+  };
   productId?: string;
 }
 
@@ -30,10 +30,13 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
   // Step 2: Initialize State from Props
   const [name, setName] = useState(initialValues?.name ?? "");
   const [description, setDescription] = useState(initialValues?.description ?? "");
-  const [price, setPrice] = useState(initialValues ? String(initialValues.price) : "");
+  const [price, setPrice] = useState(
+    initialValues
+      ? String(initialValues.merchant_price ?? initialValues.price)
+      : ""
+  );
   const [stock, setStock] = useState(initialValues ? String(initialValues.stock) : "");
-  const [minimumOrderQuantity, setMinimumOrderQuantity] =
-  useState(
+  const [minimumOrderQuantity, setMinimumOrderQuantity] = useState(
     initialValues?.minimum_order_quantity !== undefined
       ? String(initialValues.minimum_order_quantity)
       : "1"
@@ -58,16 +61,17 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
         activeImageUrl = uploadedUrl;
       }
 
-     const payload = {
-  name,
-  description,
-  price: Number(price),
-  stock: Number(stock),
-  minimum_order_quantity: Number(
-    minimumOrderQuantity
-  ),
-  image_url: activeImageUrl,
-};
+      const merchantPrice = Number(price);
+
+      const payload = {
+        name,
+        description,
+        price: merchantPrice,
+        merchant_price: merchantPrice,
+        stock: Number(stock),
+        minimum_order_quantity: Number(minimumOrderQuantity),
+        image_url: activeImageUrl,
+      };
 
       // Direct submission path depending on presence of a productId
       if (productId) {
@@ -80,10 +84,10 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
     } catch (error) {
       console.error(error);
       if (error instanceof Error) {
-  toast.error(error.message || "Unable to save product.");
-} else {
-  toast.error("Unable to save product. Please try again.");
-}
+        toast.error(error.message || "Unable to save product.");
+      } else {
+        toast.error("Unable to save product. Please try again.");
+      }
     } finally {
       if (productId) setUpdating(false);
     }
@@ -121,10 +125,16 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
 
       <div>
         <label className="mb-2 block text-sm font-medium">
-          Price
+          Your Price
         </label>
+        <p className="mb-2 text-xs text-gray-500">
+          Enter the amount you want to receive for each unit. Vendora's
+          commission will be added automatically to the customer price.
+        </p>
         <input
           type="number"
+          min="0"
+          step="0.01"
           value={price}
           onChange={(e) => setPrice(e.target.value)}
           placeholder="₦5000"
@@ -147,29 +157,27 @@ export default function ProductForm({ initialValues, productId }: ProductFormPro
         />
       </div>
 
-	<div>
-  <label className="mb-2 block text-sm font-medium">
-    Minimum Order Quantity
-  </label>
+      <div>
+        <label className="mb-2 block text-sm font-medium">
+          Minimum Order Quantity
+        </label>
 
-  <input
-    type="number"
-    min="1"
-    step="1"
-    value={minimumOrderQuantity}
-    onChange={(e) =>
-      setMinimumOrderQuantity(e.target.value)
-    }
-    placeholder="1"
-    className="w-full rounded-lg border p-3"
-    required
-  />
+        <input
+          type="number"
+          min="1"
+          step="1"
+          value={minimumOrderQuantity}
+          onChange={(e) => setMinimumOrderQuantity(e.target.value)}
+          placeholder="1"
+          className="w-full rounded-lg border p-3"
+          required
+        />
 
-  <p className="mt-1 text-xs text-gray-500">
-    The minimum number of units a customer must buy for
-    this product. Use 1 if there is no minimum.
-  </p>
-</div>
+        <p className="mt-1 text-xs text-gray-500">
+          The minimum number of units a customer must buy for
+          this product. Use 1 if there is no minimum.
+        </p>
+      </div>
 
       <div>
         <label className="mb-2 block text-sm font-medium">

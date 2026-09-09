@@ -76,10 +76,12 @@ export default function SecuritySettings() {
   }
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
-      <h2 className="mb-6 text-2xl font-bold">Password & Security</h2>
+    <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+      <h2 className="mb-5 text-lg font-semibold sm:mb-6 sm:text-xl">
+        Password & Security
+      </h2>
 
-      <div className="space-y-6">
+      <div className="space-y-5 sm:space-y-6">
         {/* Email Section */}
         <div>
           <label className="mb-1 block text-sm font-medium">
@@ -89,12 +91,12 @@ export default function SecuritySettings() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border p-3"
+            className="block w-full min-w-0 rounded-xl border p-2.5 text-sm sm:p-3 sm:text-base"
           />
           <button
             onClick={handleEmailChange}
             disabled={saving}
-            className="mt-3 rounded-xl bg-blue-600 px-5 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="mt-3 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-50 sm:px-5 sm:py-2"
           >
             Update Email
           </button>
@@ -103,7 +105,7 @@ export default function SecuritySettings() {
         <hr className="border-gray-100" />
 
         {/* Password Section */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium">
               New Password
@@ -112,7 +114,7 @@ export default function SecuritySettings() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-xl border p-3"
+              className="block w-full min-w-0 rounded-xl border p-2.5 text-sm sm:p-3 sm:text-base"
             />
           </div>
 
@@ -124,14 +126,14 @@ export default function SecuritySettings() {
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-xl border p-3"
+              className="block w-full min-w-0 rounded-xl border p-2.5 text-sm sm:p-3 sm:text-base"
             />
           </div>
 
           <button
             onClick={handlePasswordChange}
             disabled={saving}
-            className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white disabled:opacity-50"
+            className="w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition-opacity disabled:opacity-50 sm:w-auto sm:px-6 sm:py-3 sm:text-base"
           >
             {saving ? "Updating..." : "Update Password"}
           </button>

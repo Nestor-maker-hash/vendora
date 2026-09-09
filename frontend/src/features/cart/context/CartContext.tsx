@@ -28,6 +28,11 @@ interface CartContextType {
   removeFromCart: (id: string) => void;
 
   clearCart: () => void;
+
+  // Multi-business cart helpers
+  getBusinessIds: () => string[];
+  getItemsForBusiness: (businessId: string) => CartItem[];
+  clearBusinessCart: (businessId: string) => void;
 }
 
 const CartContext =
@@ -183,6 +188,41 @@ export function CartProvider({
     setCurrency("");
   }
 
+  /**
+   * Returns every unique business currently represented
+   * in the cart.
+   */
+  function getBusinessIds(): string[] {
+    return Array.from(
+      new Set(items.map((item) => item.business_id))
+    );
+  }
+
+  /**
+   * Returns only the cart items belonging to one business.
+   */
+  function getItemsForBusiness(
+    businessId: string
+  ): CartItem[] {
+    return items.filter(
+      (item) => item.business_id === businessId
+    );
+  }
+
+  /**
+   * Removes only one business's items from the cart.
+   * Other businesses remain untouched.
+   */
+  function clearBusinessCart(
+    businessId: string
+  ) {
+    setItems((current) =>
+      current.filter(
+        (item) => item.business_id !== businessId
+      )
+    );
+  }
+
   return (
     <CartContext.Provider
       value={{
@@ -204,6 +244,10 @@ export function CartProvider({
 
         removeFromCart,
         clearCart,
+
+        getBusinessIds,
+        getItemsForBusiness,
+        clearBusinessCart,
       }}
     >
       {children}

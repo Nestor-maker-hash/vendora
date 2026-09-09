@@ -11,11 +11,11 @@ export default function DashboardPage() {
     <AuthGuard>
       <DashboardLayout>
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl font-bold sm:text-3xl">
             Dashboard
           </h1>
 
-          <p className="mt-2 text-gray-600">
+          <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
             Welcome to Vendora.
           </p>
 

@@ -40,6 +40,7 @@ export async function POST(
         .select(`
           id,
           business_id,
+          status,
           payment_method,
           payment_status,
           paid_at,
@@ -66,17 +67,19 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "You do not have permission to confirm this payment.",
+          message:
+            "You do not have permission to confirm this payment.",
         },
         { status: 403 }
       );
     }
 
-    if (order.payment_method !== "bank_transfer") {
+    if (order.payment_method !== "pay_on_delivery") {
       return NextResponse.json(
         {
           success: false,
-          message: "Only bank transfer payments can be manually confirmed.",
+          message:
+            "This order does not use pay on delivery.",
         },
         { status: 400 }
       );
@@ -86,6 +89,7 @@ export async function POST(
       return NextResponse.json({
         success: true,
         alreadyPaid: true,
+        paidAt: order.paid_at,
       });
     }
 
@@ -93,7 +97,19 @@ export async function POST(
       return NextResponse.json(
         {
           success: false,
-          message: "This payment cannot be confirmed.",
+          message:
+            "This payment cannot be confirmed.",
+        },
+        { status: 400 }
+      );
+    }
+
+    if (order.status !== "delivered") {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Pay on delivery payment can only be confirmed after the order is delivered.",
         },
         { status: 400 }
       );
@@ -101,7 +117,7 @@ export async function POST(
 
     const paidAt = new Date().toISOString();
 
-    const { error: updateError } =
+    const { data: updatedOrder, error: updateError } =
       await supabaseServer
         .from("orders")
         .update({
@@ -110,10 +126,25 @@ export async function POST(
         })
         .eq("id", orderId)
         .eq("business_id", order.business_id)
-        .eq("payment_status", "pending");
+        .eq("payment_method", "pay_on_delivery")
+        .eq("payment_status", "pending")
+        .eq("status", "delivered")
+        .select("id, payment_status, paid_at")
+        .maybeSingle();
 
     if (updateError) {
       throw updateError;
+    }
+
+    if (!updatedOrder) {
+      return NextResponse.json(
+        {
+          success: false,
+          message:
+            "Payment could not be confirmed. Please refresh and try again.",
+        },
+        { status: 409 }
+      );
     }
 
     return NextResponse.json({
@@ -123,7 +154,7 @@ export async function POST(
     });
   } catch (error) {
     console.error(
-      "Confirm payment error:",
+      "Confirm POD payment error:",
       error
     );
 

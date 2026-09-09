@@ -61,19 +61,41 @@ export default function NotificationSettings() {
   }
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+        <div className="h-6 w-44 animate-pulse rounded bg-gray-200" />
+
+        <div className="mt-5 space-y-3 sm:mt-6 sm:space-y-4">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center justify-between rounded-xl border p-3 sm:p-4"
+            >
+              <div className="min-w-0 flex-1 space-y-2">
+                <div className="h-4 w-40 max-w-full animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-64 max-w-full animate-pulse rounded bg-gray-100" />
+              </div>
+
+              <div className="ml-3 h-7 w-14 shrink-0 animate-pulse rounded-full bg-gray-200" />
+            </div>
+          ))}
+
+          <div className="h-11 w-full animate-pulse rounded-xl bg-gray-200" />
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
-      <h2 className="mb-6 text-2xl font-bold">
+    <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+      <h2 className="mb-5 text-lg font-semibold sm:mb-6 sm:text-xl">
         Notification Settings
       </h2>
 
-      <div className="space-y-6">
+      <div className="min-w-0 space-y-5 sm:space-y-6">
         <PushNotificationBanner />
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <Toggle
             label="WhatsApp Order Alerts"
             description="Receive a WhatsApp alert whenever a customer places an order."
@@ -137,7 +159,7 @@ export default function NotificationSettings() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="mt-6 w-full rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50"
+            className="mt-5 w-full rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700 disabled:opacity-50 sm:mt-6 sm:px-6 sm:py-3 sm:text-base"
           >
             {saving
               ? "Saving..."
@@ -163,13 +185,13 @@ function Toggle({
   onChange,
 }: ToggleProps) {
   return (
-    <div className="flex items-center justify-between rounded-2xl border bg-white p-4">
-      <div className="pr-4">
-        <h3 className="font-semibold">
+    <div className="flex min-w-0 items-start justify-between gap-3 rounded-xl border bg-white p-3 sm:items-center sm:gap-4 sm:rounded-2xl sm:p-4">
+      <div className="min-w-0 flex-1 pr-1 sm:pr-4">
+        <h3 className="text-sm font-semibold sm:text-base">
           {label}
         </h3>
 
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 break-words text-xs text-gray-500 sm:text-sm">
           {description}
         </p>
       </div>
@@ -177,7 +199,7 @@ function Toggle({
       <button
         type="button"
         onClick={() => onChange(!value)}
-        className={`relative h-7 w-14 rounded-full transition-colors duration-300 ${
+        className={`relative h-6 w-12 shrink-0 rounded-full sm:h-7 sm:w-14 transition-colors duration-300 ${
           value
             ? "bg-emerald-600"
             : "bg-gray-300"
@@ -186,7 +208,7 @@ function Toggle({
         <span
           className={`absolute left-1 top-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${
             value
-              ? "translate-x-7"
+              ? "translate-x-6 sm:translate-x-7"
               : "translate-x-0"
           }`}
         />

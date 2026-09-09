@@ -1,14 +1,20 @@
 import { supabase } from "@/src/lib/supabase";
 
-export async function loginWithGoogle() {
-  const redirectTo =
-    `${window.location.origin}/auth/callback`;
+export async function loginWithGoogle(returnTo?: string) {
+  const callbackUrl = new URL(
+    "/auth/callback",
+    window.location.origin
+  );
+
+  if (returnTo) {
+    callbackUrl.searchParams.set("next", returnTo);
+  }
 
   const { error } =
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo,
+        redirectTo: callbackUrl.toString(),
       },
     });
 

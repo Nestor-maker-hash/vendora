@@ -19,7 +19,6 @@ export async function getPostOnboardingStatus() {
 
   const paymentReady =
     business.pay_on_delivery_enabled === true ||
-    business.bank_transfer_enabled === true ||
     business.online_payment_enabled === true;
 
   const { count: deliveryZoneCount, error: deliveryError } =

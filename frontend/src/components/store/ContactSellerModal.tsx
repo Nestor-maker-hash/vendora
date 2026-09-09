@@ -1,12 +1,15 @@
 "use client";
 
 import { X, MessageCircle, Mail, MapPin } from "lucide-react";
+import { formatBusinessLocation } from "@/src/lib/formatBusinessLocation";
 
 interface Business {
   name: string;
   phone?: string | null;
   email?: string | null;
   address?: string | null;
+  city?: string | null;
+  state?: string | null;
   logo_url?: string | null;
 }
 
@@ -24,7 +27,9 @@ export default function ContactSellerModal({
   if (!open) return null;
 
 const whatsappLink = business.phone
-  ? `https://wa.me/${business.phone.replace(/\D/g, "")}`
+  ? `https://wa.me/${business.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+      "Hi from your Vendora store! I'm interested in one of your products."
+    )}`
   : null;
 
   return (
@@ -115,17 +120,17 @@ const whatsappLink = business.phone
             </a>
           )}
 
-          {business.address && (
+          {formatBusinessLocation(business) && (
             <div className="flex items-center gap-4 rounded-2xl border p-4">
               <MapPin />
 
               <div>
                 <p className="font-semibold">
-                  Store Address
+                  Store Location
                 </p>
 
                 <p className="text-sm text-gray-500">
-                  {business.address}
+                  {formatBusinessLocation(business)}
                 </p>
               </div>
             </div>

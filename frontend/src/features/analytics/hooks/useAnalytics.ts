@@ -4,8 +4,7 @@ import { useEffect, useState } from "react";
 import { getAnalytics } from "../services/getAnalytics";
 import { getTopProducts } from "../services/getTopProducts";
 
-export function useAnalytics() {
-const [analytics, setAnalytics] = useState({
+const initialAnalytics = {
   revenue: 0,
   orders: 0,
   customers: 0,
@@ -15,41 +14,76 @@ const [analytics, setAnalytics] = useState({
   averageOrderValue: 0,
   lowStockProducts: 0,
   revenueHistory: [] as {
-  date: string;
-  revenue: number;
-}[],
+    date: string;
+    revenue: number;
+  }[],
   topProducts: [] as {
     name: string;
     quantity: number;
     revenue: number;
   }[],
-});
+};
 
+export function useAnalytics() {
+  const [analytics, setAnalytics] =
+    useState(initialAnalytics);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState<string | null>(null);
 
   useEffect(() => {
+    let active = true;
+
     async function load() {
       try {
-        const [summary, topProducts] = await Promise.all([
-  getAnalytics(),
-  getTopProducts(),
-]);
+        setLoading(true);
+        setError(null);
 
-setAnalytics({
-  ...summary,
-  topProducts,
-});
+        const [summary, topProducts] =
+          await Promise.all([
+            getAnalytics(),
+            getTopProducts(),
+          ]);
+
+        if (!active) return;
+
+        setAnalytics({
+          ...summary,
+          topProducts,
+        });
+      } catch (err) {
+        console.error(
+          "Analytics loading error:",
+          err
+        );
+
+        if (!active) return;
+
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load analytics."
+        );
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     }
 
     load();
+
+    return () => {
+      active = false;
+    };
   }, []);
 
   return {
     analytics,
     loading,
+    error,
   };
 }

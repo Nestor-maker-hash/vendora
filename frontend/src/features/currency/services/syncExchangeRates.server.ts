@@ -10,7 +10,7 @@ const QUOTE_CURRENCIES = [
   "KES",
 ] as const;
 
-const RATE_TTL_HOURS = 24;
+const RATE_TTL_HOURS = 48;
 
 interface FrankfurterRate {
   date: string;

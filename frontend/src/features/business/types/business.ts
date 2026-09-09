@@ -28,12 +28,13 @@ export interface Business {
   twitter: string | null;
 
   pay_on_delivery_enabled: boolean | null;
-  bank_transfer_enabled: boolean | null;
   online_payment_enabled: boolean | null;
 
-  bank_name: string | null;
-  account_name: string | null;
-  account_number: string | null;
+  paystack_subaccount_code: string | null;
+  paystack_bank_code: string | null;
+  paystack_connected: boolean;
+  paystack_connected_at: string | null;
+
 
   minimum_order_mode: string | null;
   minimum_order_quantity: number | null;

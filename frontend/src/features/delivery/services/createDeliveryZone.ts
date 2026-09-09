@@ -1,9 +1,7 @@
 import { supabase } from "@/src/lib/supabase";
 import type { DeliveryZone } from "../types/deliveryZone";
-import { checkSubscriptionLimit } from "@/src/features/subscriptions/services/checkSubscriptionLimit";
 
 interface CreateDeliveryZoneData {
-  businessId: string;
   location: string;
   price: number;
   freeDelivery: boolean;
@@ -12,58 +10,35 @@ interface CreateDeliveryZoneData {
 export async function createDeliveryZone(
   data: CreateDeliveryZoneData
 ): Promise<DeliveryZone> {
-  const location = data.location.trim();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!location) {
-    throw new Error("Delivery location is required.");
+  if (!session?.access_token) {
+    throw new Error("User not authenticated.");
   }
 
-  if (!data.freeDelivery && data.price < 0) {
-    throw new Error("Delivery price cannot be negative.");
-  }
-
-  const { count: deliveryZoneCount, error: deliveryZoneCountError } =
-    await supabase
-      .from("delivery_zones")
-      .select("id", { count: "exact", head: true })
-      .eq("business_id", data.businessId);
-
-  if (deliveryZoneCountError) {
-    throw deliveryZoneCountError;
-  }
-
-  const deliveryZoneLimit = await checkSubscriptionLimit(
-    data.businessId,
-    "max_delivery_zones",
-    deliveryZoneCount ?? 0
+  const response = await fetch(
+    "/api/delivery-zones",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify(data),
+    }
   );
 
-  if (!deliveryZoneLimit.allowed) {
+  const result = await response.json();
+
+  if (!response.ok || !result.success) {
     throw new Error(
-      `You've reached the ${deliveryZoneLimit.planName} plan limit of ${deliveryZoneLimit.limit} delivery zones. Upgrade your plan to add more delivery zones.`
+      result.message ??
+        "Failed to create delivery zone."
     );
   }
 
-  const { data: zone, error } = await supabase
-    .from("delivery_zones")
-    .insert({
-      business_id: data.businessId,
-      location,
-      price: data.price,
-      free_delivery: data.freeDelivery,
-    })
-    .select("*")
-    .single();
-
-  if (error) {
-    if (error.code === "23505") {
-      throw new Error(
-        "A delivery zone with this location already exists."
-      );
-    }
-
-    throw error;
-  }
-
-  return zone as DeliveryZone;
+  return result.zone as DeliveryZone;
 }

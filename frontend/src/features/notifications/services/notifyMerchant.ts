@@ -26,5 +26,4 @@ export async function notifyMerchant(
     link: `/dashboard/orders/${order.id}`,
   });
 
-  console.log("Merchant notified.");
 }

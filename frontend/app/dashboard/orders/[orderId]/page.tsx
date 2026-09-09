@@ -22,10 +22,10 @@ const order = await getOrderById(orderId);
   return (
     <AuthGuard>
       <DashboardLayout>
-        <div className="space-y-8">
+        <div className="space-y-5 sm:space-y-8">
 
           <div>
-            <h1 className="text-3xl font-bold">
+            <h1 className="text-2xl font-bold sm:text-3xl">
               Order Details
             </h1>
 
@@ -36,8 +36,8 @@ const order = await getOrderById(orderId);
 
           {/* Customer */}
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold">
+          <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+            <h2 className="mb-3 text-lg font-semibold sm:mb-4 sm:text-xl">
               Customer
             </h2>
 
@@ -55,8 +55,8 @@ const order = await getOrderById(orderId);
 
           {/* Delivery */}
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
-            <h2 className="mb-4 text-xl font-semibold">
+          <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+            <h2 className="mb-3 text-lg font-semibold sm:mb-4 sm:text-xl">
               Delivery Address
             </h2>
 
@@ -83,17 +83,17 @@ const order = await getOrderById(orderId);
 
           {/* Items */}
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
 
-            <h2 className="mb-6 text-xl font-semibold">
+            <h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">
               Ordered Products
             </h2>
 
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               {order.order_items.map((item: OrderItem) => (
                 <div
                   key={item.id}
-                  className="flex justify-between border-b pb-4"
+                  className="flex items-start justify-between gap-3 border-b pb-4"
                 >
                   <div>
                     <p className="font-semibold">
@@ -119,9 +119,9 @@ const order = await getOrderById(orderId);
 
           {/* Totals */}
 
-          <div className="rounded-2xl border bg-white p-6 shadow-sm">
+          <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
 
-            <h2 className="mb-6 text-xl font-semibold">
+            <h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">
               Payment Summary
             </h2>
 
@@ -147,7 +147,7 @@ const order = await getOrderById(orderId);
                 </span>
               </div>
 
-              <div className="flex justify-between text-lg font-bold">
+              <div className="flex justify-between text-base font-bold sm:text-lg">
                 <span>Total</span>
 
                 <span className="text-emerald-600">
@@ -162,8 +162,8 @@ const order = await getOrderById(orderId);
 
           </div>
 <PaymentVerification order={order} />
-	   <div className="rounded-2xl border bg-white p-6 shadow-sm">
-  <h2 className="mb-4 text-xl font-semibold">
+	   <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+  <h2 className="mb-3 text-lg font-semibold sm:mb-4 sm:text-xl">
     Order Actions
   </h2>
 

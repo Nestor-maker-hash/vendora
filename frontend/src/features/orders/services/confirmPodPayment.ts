@@ -1,10 +1,8 @@
-import { Order } from "../types/order";
-
-export async function submitBankTransfer(
-  token: string
-): Promise<Partial<Order>> {
+export async function confirmPodPayment(
+  orderId: string
+) {
   const response = await fetch(
-    `/api/orders/public/${token}/submit-payment`,
+    `/api/orders/${orderId}/confirm-pod-payment`,
     {
       method: "POST",
       headers: {
@@ -18,7 +16,7 @@ export async function submitBankTransfer(
   if (!response.ok || !result.success) {
     throw new Error(
       result.message ??
-        "Failed to submit payment."
+        "Failed to confirm pay on delivery payment."
     );
   }
 

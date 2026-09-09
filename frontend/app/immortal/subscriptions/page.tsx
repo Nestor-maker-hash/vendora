@@ -12,6 +12,7 @@ import { getImmortalPlans } from "@/src/features/immortal/services/getImmortalPl
 import ImmortalPlansManager from "@/src/features/immortal/components/ImmortalPlansManager";
 import ImmortalPlatformSettings from "@/src/features/immortal/components/ImmortalPlatformSettings";
 import { getPlatformSettings } from "@/src/features/platform/services/getPlatformSettings";
+import { getPlatformPaymentSettings } from "@/src/features/platform/services/getPlatformPaymentSettings";
 
 function formatNumber(value: number) {
   return value.toLocaleString();
@@ -67,12 +68,17 @@ export default async function ImmortalSubscriptionsPage() {
   await getImmortalAccess();
 
 
-const [plans, subscriptions, platformSettings] =
-  await Promise.all([
-    getImmortalPlans(),
-    getImmortalSubscriptions(),
-    getPlatformSettings(),
-  ]);
+const [
+  plans,
+  subscriptions,
+  platformSettings,
+  platformPaymentSettings,
+] = await Promise.all([
+  getImmortalPlans(),
+  getImmortalSubscriptions(),
+  getPlatformSettings(),
+  getPlatformPaymentSettings(),
+]);
 
   const active = subscriptions.filter(
     (subscription) => subscription.status === "active"
@@ -188,11 +194,24 @@ const [plans, subscriptions, platformSettings] =
         </section>
 
 
-        <ImmortalPlatformSettings
-          initialLockOverLimitProducts={
-            platformSettings.lock_over_limit_products
-          }
-        />
+       <ImmortalPlatformSettings
+  initialLockOverLimitProducts={
+    platformSettings.lock_over_limit_products
+  }
+  initialVendoraCustomerFeePercentage={
+    platformPaymentSettings.vendora_customer_fee_percentage
+  }
+  initialMerchantFeePercentage={
+    platformPaymentSettings.merchant_fee_percentage
+  }
+
+initialPlatformCommissionPercentage={
+    platformPaymentSettings.platform_commission_percentage
+  }
+  initialPaystackFeeBearer={
+    platformPaymentSettings.paystack_fee_bearer
+  }
+/>
 
         <ImmortalPlansManager initialPlans={plans} />
 

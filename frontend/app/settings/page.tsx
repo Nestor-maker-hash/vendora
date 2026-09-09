@@ -7,12 +7,12 @@ export default function Settings() {
     <AuthGuard>
       <DashboardLayout>
 
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">
+        <div className="mb-5 sm:mb-8">
+          <h1 className="text-2xl font-bold sm:text-3xl">
             Settings
           </h1>
 
-          <p className="mt-2 text-gray-500">
+          <p className="mt-1.5 text-sm text-gray-500 sm:mt-2 sm:text-base">
             Manage your business preferences.
           </p>
         </div>

@@ -29,7 +29,7 @@ export default function StepLocation({
   async function handleFinish() {
     if (!data.address.trim()) {
       toast.error(
-        "Please enter your business address."
+        "Please enter your business location."
       );
 
       return;
@@ -56,7 +56,6 @@ export default function StepLocation({
 
       await finishOnboarding(data);
 
-
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
@@ -71,21 +70,24 @@ export default function StepLocation({
 
   return (
     <div>
-
       <h1 className="text-3xl font-bold">
         Business Location
       </h1>
 
       <p className="mt-2 text-gray-500">
-        Tell customers where your business operates.
+        Tell customers where they can find your business.
       </p>
 
       <div className="mt-8 space-y-6">
-
         <div>
           <label className="mb-2 block font-medium">
-            Business Address
+            Market / Business Location
           </label>
+
+          <p className="mb-2 text-sm text-gray-500">
+            Enter the market, shopping complex, plaza,
+            street, or area where your business operates.
+          </p>
 
           <input
             value={data.address}
@@ -95,7 +97,7 @@ export default function StepLocation({
               })
             }
             className="w-full rounded-xl border p-4 outline-none focus:border-emerald-600"
-            placeholder="Address"
+            placeholder="e.g. Ogige Market"
           />
         </div>
 
@@ -141,14 +143,12 @@ export default function StepLocation({
               })
             }
             className="w-full rounded-xl border p-4 outline-none focus:border-emerald-600"
-            placeholder="Town"
+            placeholder="e.g. Nsukka"
           />
         </div>
-
       </div>
 
       <div className="mt-10 flex justify-between">
-
         <button
           onClick={back}
           disabled={loading}
@@ -166,9 +166,7 @@ export default function StepLocation({
             ? "Finishing..."
             : "Finish"}
         </button>
-
       </div>
-
     </div>
   );
 }

@@ -269,14 +269,15 @@ export async function POST(
       );
     }
 
+    /*
+     * Use the origin of the actual request.
+     *
+     * This ensures local development payments return
+     * to the local application, while production
+     * payments return to the production application.
+     */
     const appUrl =
-      process.env.NEXT_PUBLIC_APP_URL;
-
-    if (!appUrl) {
-      throw new Error(
-        "Application URL is not configured."
-      );
-    }
+      new URL(request.url).origin;
 
     const redirectUrl =
       `${appUrl}/subscription/payment/callback`;

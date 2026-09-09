@@ -6,19 +6,7 @@ export default function AnalyticsPage() {
   return (
     <AuthGuard>
       <DashboardLayout>
-
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">
-            Analytics
-          </h1>
-
-          <p className="mt-2 text-gray-500">
-            Monitor your business performance.
-          </p>
-        </div>
-
         <AnalyticsOverview />
-
       </DashboardLayout>
     </AuthGuard>
   );

@@ -10,19 +10,19 @@ export default function Navbar() {
   const unreadCount = useUnreadNotifications();
   
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-gray-200 bg-white/95 px-5 backdrop-blur">
+    <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-gray-200 bg-white/95 px-3 sm:px-5 backdrop-blur">
 
       {/* Left */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4">
 
         <button
           onClick={() => setOpen(!open)}
-          className="rounded-lg p-2 transition hover:bg-gray-100 lg:hidden"
+          className="rounded-lg p-1.5 transition hover:bg-gray-100 lg:hidden"
         >
-          <Menu size={22} />
+          <Menu size={20} />
         </button>
 
-        <h1 className="text-2xl font-bold tracking-tight text-emerald-600">
+        <h1 className="text-xl font-bold tracking-tight text-emerald-600 sm:text-2xl">
           Vendora
         </h1>
 
@@ -48,13 +48,13 @@ export default function Navbar() {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
 
       <Link
   href="/dashboard/notifications"
-  className="relative rounded-xl border border-gray-200 bg-white p-2 transition hover:bg-gray-50"
+  className="relative rounded-lg border border-gray-200 bg-white p-1.5 transition hover:bg-gray-50 sm:rounded-xl sm:p-2"
 >
-  <Bell size={20} />
+  <Bell size={18} />
 
   {unreadCount > 0 && (
     <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 px-1 text-xs font-bold text-white">
@@ -63,9 +63,9 @@ export default function Navbar() {
   )}
 </Link>
 
-        <div className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2">
+        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-2 py-1.5 sm:rounded-xl sm:px-3 sm:py-2">
 
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 font-semibold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-600 text-sm font-semibold text-white sm:h-10 sm:w-10 sm:text-base">
             N
           </div>
 

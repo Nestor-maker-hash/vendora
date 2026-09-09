@@ -9,12 +9,6 @@ export async function getImmortalAccess() {
     error: userError,
   } = await supabase.auth.getUser();
 
-  console.log("IMMORTAL AUTH CHECK:", {
-    hasUser: !!user,
-    userId: user?.id,
-    userError: userError?.message,
-  });
-
   if (userError || !user) {
     redirect("/login");
   }
@@ -25,12 +19,6 @@ export async function getImmortalAccess() {
       .select("role")
       .eq("id", user.id)
       .single();
-
-  console.log("IMMORTAL PROFILE CHECK:", {
-    userId: user.id,
-    profile,
-    profileError: profileError?.message,
-  });
 
   if (profileError || profile?.role !== "super_admin") {
     redirect("/dashboard");

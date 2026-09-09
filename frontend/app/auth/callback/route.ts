@@ -1,9 +1,20 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerAuthClient } from "@/src/lib/supabaseServerAuth";
 
+function getSafeNext(requestUrl: URL) {
+  const next = requestUrl.searchParams.get("next");
+
+  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+    return null;
+  }
+
+  return next;
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const next = getSafeNext(requestUrl);
 
   if (!code) {
     return NextResponse.redirect(
@@ -34,6 +45,14 @@ export async function GET(request: Request) {
   if (!user) {
     return NextResponse.redirect(
       new URL("/login?error=no_user", request.url)
+    );
+  }
+
+  // Checkout/customer authentication has priority over
+  // merchant onboarding/dashboard routing.
+  if (next) {
+    return NextResponse.redirect(
+      new URL(next, request.url)
     );
   }
 

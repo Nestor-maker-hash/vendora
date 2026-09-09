@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/src/lib/supabase";
 import {
   Menu,
   Search,
@@ -12,6 +13,7 @@ import {
   Info,
   Phone,
   X,
+  Compass,
 } from "lucide-react";
 import { useCart } from "@/src/features/cart/context/CartContext";
 import ContactSellerModal from "./ContactSellerModal";
@@ -24,7 +26,9 @@ interface Business {
   email?: string | null;
 
   description?: string | null;
-  address?: string |null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
 
   logo_url?: string | null;
   banner_url?: string | null;
@@ -54,6 +58,34 @@ export default function StoreNavbar({
 const [showSearch, setShowSearch] = useState(false);
 const [menuOpen, setMenuOpen] = useState(false);
 const [contactOpen, setContactOpen] = useState(false);
+const [authenticated, setAuthenticated] = useState(false);
+
+useEffect(() => {
+  let mounted = true;
+
+  async function checkSession() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (mounted) {
+      setAuthenticated(!!session);
+    }
+  }
+
+  checkSession();
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((_event, session) => {
+    setAuthenticated(!!session);
+  });
+
+  return () => {
+    mounted = false;
+    subscription.unsubscribe();
+  };
+}, []);
 
   const cartCount = items.reduce(
     (sum, item) => sum + item.quantity,
@@ -103,9 +135,14 @@ const [contactOpen, setContactOpen] = useState(false);
             )}
           </Link>
 
-          <button className="rounded-lg p-2 hover:bg-gray-100">
+          <Link
+            href={authenticated ? "/buyer" : "/login?next=/buyer"}
+            className="rounded-lg p-2 hover:bg-gray-100"
+            aria-label={authenticated ? "My account" : "Sign in"}
+            title={authenticated ? "My account" : "Sign in"}
+          >
             <User size={22} />
-          </button>
+          </Link>
 
         </div>
 
@@ -141,11 +178,11 @@ const [contactOpen, setContactOpen] = useState(false);
 
 {/* Drawer */}
 <div
-  className={`fixed left-0 top-0 z-50 h-full w-72 bg-white shadow-2xl transition-transform duration-300 ${
+  className={`fixed left-0 top-0 z-50 h-full w-64 bg-white shadow-2xl transition-transform duration-300 ${
     menuOpen ? "translate-x-0" : "-translate-x-full"
   }`}
 >
-  <div className="flex items-center justify-between border-b p-5">
+  <div className="flex items-center justify-between border-b px-4 py-3">
     <h2 className="text-xl font-bold text-emerald-600">
       Vendora
     </h2>
@@ -158,23 +195,23 @@ const [contactOpen, setContactOpen] = useState(false);
     </button>
   </div>
 
-  <nav className="space-y-2 p-4">
+  <nav className="space-y-1 p-3">
 
     <Link
   href={storeHref}
   onClick={() => setMenuOpen(false)}
-  className="flex items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-gray-100"
+  className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-gray-100"
 >
-      <Home size={20} />
+      <Home size={18} />
       Home
     </Link>
 
     <Link
       href="/cart"
       onClick={() => setMenuOpen(false)}
-      className="flex items-center gap-3 rounded-xl px-4 py-3 transition hover:bg-gray-100"
+      className="flex items-center gap-3 rounded-xl px-3 py-2.5 transition hover:bg-gray-100"
     >
-      <ShoppingCart size={20} />
+      <ShoppingCart size={18} />
       Cart
     </Link>
 
@@ -183,36 +220,70 @@ const [contactOpen, setContactOpen] = useState(false);
         setShowSearch(true);
         setMenuOpen(false);
       }}
-      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition hover:bg-gray-100"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition hover:bg-gray-100"
     >
-      <Search size={20} />
+      <Search size={18} />
       Search Products
     </button>
 
     <div className="my-4 border-t" />
 
+    <div className="px-1 pb-2">
+      <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+        Store
+      </p>
+    </div>
+
     <button
-      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition hover:bg-gray-100"
+      type="button"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-gray-700 transition hover:bg-gray-50"
     >
-      <Store size={20} />
-      About Store
+      <Store size={18} className="text-gray-500" />
+      <span>About Store</span>
     </button>
 
-<button
-  onClick={() => {
-    setMenuOpen(false);
-    setContactOpen(true);
-  }}
-  className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition hover:bg-gray-100"
->
-  <Phone size={20} />
-  Contact Seller
-</button>
+    <button
+      type="button"
+      onClick={() => {
+        setMenuOpen(false);
+        setContactOpen(true);
+      }}
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-gray-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+    >
+      <Phone size={18} className="text-gray-500" />
+      <span>Contact Seller</span>
+    </button>
+
+    <div className="my-4 border-t" />
+
+    <div className="px-1 pb-2">
+      <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-400">
+        Vendora
+      </p>
+    </div>
+
+    <Link
+      href="/marketplace"
+      onClick={() => setMenuOpen(false)}
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-gray-700 transition hover:bg-emerald-50 hover:text-emerald-700"
+    >
+      <Compass size={18} className="text-gray-500" />
+
+      <span className="flex-1">
+        <span className="block text-sm font-medium">
+          Marketplace
+        </span>
+        <span className="text-[11px] text-gray-400">
+          Discover more stores
+        </span>
+      </span>
+    </Link>
 
     <button
-      className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition hover:bg-gray-100"
+      type="button"
+      className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-gray-700 transition hover:bg-gray-50"
     >
-      <Info size={20} />
+      <Info size={18} className="text-gray-500" />
       About Vendora
     </button>
 

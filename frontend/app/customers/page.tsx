@@ -6,12 +6,12 @@ export default function CustomersPage() {
   return (
     <AuthGuard>
       <DashboardLayout>
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">
+        <div className="mb-5 sm:mb-8">
+          <h1 className="text-2xl font-bold sm:text-3xl">
             Customers
           </h1>
 
-          <p className="mt-2 text-gray-600">
+          <p className="mt-1 text-sm text-gray-600 sm:mt-2 sm:text-base">
             Manage your customer relationships.
           </p>
         </div>

@@ -6,8 +6,6 @@ import toast from "react-hot-toast";
 
 export default function RealtimeNotifications() {
 useEffect(() => {
-  console.log("Realtime Notifications Started");
-
   const channel = supabase
     .channel("merchant-notifications")
     .on(
@@ -18,8 +16,6 @@ useEffect(() => {
         table: "notifications",
       },
       (payload) => {
-        console.log("NEW NOTIFICATION:", payload);
-
         const notification = payload.new as {
           title: string;
           message: string;

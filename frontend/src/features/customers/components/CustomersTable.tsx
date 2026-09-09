@@ -27,15 +27,45 @@ const { currency } = useBusiness();
 
 if (loading) {
   return (
-    <div className="rounded-2xl border bg-white p-8 text-center">
-      Loading customers...
+    <div className="min-w-0 overflow-x-auto rounded-2xl border bg-white shadow-sm">
+      <div className="min-w-[700px]">
+        <div className="grid grid-cols-[2fr_1fr_1.5fr_1.5fr_0.7fr] gap-4 border-b bg-gray-50 px-3 py-3 sm:px-6 sm:py-4">
+          <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-16 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-10 animate-pulse rounded bg-gray-200" />
+        </div>
+
+        <div className="divide-y">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="grid grid-cols-[2fr_1fr_1.5fr_1.5fr_0.7fr] items-center gap-4 px-3 py-4 sm:px-6"
+            >
+              <div className="space-y-2">
+                <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-24 animate-pulse rounded bg-gray-100" />
+              </div>
+
+              <div className="h-4 w-8 animate-pulse rounded bg-gray-200" />
+
+              <div className="h-4 w-20 animate-pulse rounded bg-gray-200" />
+
+              <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+
+              <div className="h-4 w-10 animate-pulse rounded bg-gray-200" />
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
 
   return (
     <>
-      <div className="mb-6">
+      <div className="mb-4 sm:mb-6">
         <Input
           placeholder="Search customers..."
           value={search}
@@ -43,27 +73,27 @@ if (loading) {
         />
       </div>
 
-      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-        <table className="w-full">
+      <div className="min-w-0 overflow-x-auto rounded-2xl border bg-white shadow-sm">
+        <table className="w-full min-w-[700px]">
           <thead className="border-b bg-gray-50">
             <tr>
-              <th className="px-6 py-4 text-left text-sm font-semibold">
+              <th className="px-3 py-3 sm:px-6 sm:py-4 text-left text-sm font-semibold">
                 Customer
               </th>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold">
+              <th className="px-3 py-3 sm:px-6 sm:py-4 text-left text-sm font-semibold">
                 Orders
               </th>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold">
+              <th className="px-3 py-3 sm:px-6 sm:py-4 text-left text-sm font-semibold">
                 Total Spent
               </th>
 
-              <th className="px-6 py-4 text-left text-sm font-semibold">
+              <th className="px-3 py-3 sm:px-6 sm:py-4 text-left text-sm font-semibold">
                 Last Order
               </th>
 
-              <th className="px-6 py-4"></th>
+              <th className="px-3 py-3 sm:px-6 sm:py-4"></th>
             </tr>
           </thead>
 
@@ -73,7 +103,7 @@ if (loading) {
                 key={customer.phone}
                 className="border-b hover:bg-gray-50"
               >
-                <td className="px-6 py-4">
+                <td className="px-3 py-3 sm:px-6 sm:py-4">
                   <div className="font-medium">
                     {customer.name}
                   </div>
@@ -89,21 +119,21 @@ if (loading) {
                   )}
                 </td>
 
-                <td className="px-6 py-4">
+                <td className="px-3 py-3 sm:px-6 sm:py-4">
                   {customer.orders}
                 </td>
 
-                <td className="px-6 py-4 font-medium">
+                <td className="px-3 py-3 sm:px-6 sm:py-4 font-medium">
                   {formatCurrency(customer.totalSpent, currency)}
                 </td>
 
-                <td className="px-6 py-4 text-sm text-gray-500">
+                <td className="px-3 py-3 sm:px-6 sm:py-4 text-sm text-gray-500">
                   {new Date(
                     customer.lastOrder
                   ).toLocaleDateString()}
                 </td>
 
-                <td className="px-6 py-4">
+                <td className="px-3 py-3 sm:px-6 sm:py-4">
                   <Link
                     href={`/customers/${encodeURIComponent(customer.phone)}`}
                     className="text-sm font-medium text-emerald-600 hover:text-emerald-700"

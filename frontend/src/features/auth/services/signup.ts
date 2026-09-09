@@ -5,8 +5,6 @@ export async function signup(
   password: string,
   fullName: string
 ) {
-  console.log("signup.ts: calling Supabase");
-
   const { data, error } =
     await supabase.auth.signUp({
       email,
@@ -19,11 +17,6 @@ export async function signup(
         },
       },
     });
-
-  console.log("signup.ts: Supabase response", {
-    data,
-    error,
-  });
 
   if (error) {
     throw error;

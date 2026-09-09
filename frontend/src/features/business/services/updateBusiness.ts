@@ -10,8 +10,12 @@ interface UpdateBusinessData {
   currency?: string;
 
   pay_on_delivery_enabled?: boolean;
-  bank_transfer_enabled?: boolean;
   online_payment_enabled?: boolean;
+
+  paystack_subaccount_code?: string;
+  paystack_bank_code?: string | null;
+  paystack_connected?: boolean;
+  paystack_connected_at?: string | null;
 
   bank_name?: string;
   account_name?: string;

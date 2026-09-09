@@ -1,15 +1,13 @@
 "use client";
 
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { BillingCycle } from "@/src/features/subscriptions/services/initializeSubscriptionPayment";
 import toast from "react-hot-toast";
 
 import { useSubscription } from "@/src/features/subscriptions/hooks/useSubscription";
-import {
-  initializeSubscriptionPayment,
-} from "@/src/features/subscriptions/services/initializeSubscriptionPayment";
 import { changeSubscriptionPlan } from "@/src/features/subscriptions/services/changeSubscriptionPlan";
+import { useExchangeRate } from "@/src/features/currency/hooks/useExchangeRate";
+import { formatSubscriptionPrice } from "@/src/features/subscriptions/utils/formatSubscriptionPrice";
 
 export default function SubscriptionSettings() {
   const {
@@ -26,64 +24,20 @@ export default function SubscriptionSettings() {
   const [billingCycle, setBillingCycle] =
     useState<BillingCycle>("monthly");
 
-  const [exchangeRate, setExchangeRate] =
-    useState(1);
+  const {
+    rate: exchangeRate,
+    loading: rateLoading,
+  } = useExchangeRate(currency);
 
-  const [rateLoading, setRateLoading] =
-    useState(false);
-
-  useEffect(() => {
-    async function loadExchangeRate() {
-      if (!currency || currency === "NGN") {
-        setExchangeRate(1);
-        return;
-      }
-
-      try {
-        setRateLoading(true);
-
-        const response = await fetch(
-          `/api/currency/rates?currency=${encodeURIComponent(
-            currency
-          )}`,
-          {
-            cache: "no-store",
-          }
-        );
-
-        const result = await response.json();
-
-        if (
-          !response.ok ||
-          !result.success
-        ) {
-          throw new Error(
-            result.message ??
-              "Failed to load exchange rate."
-          );
-        }
-
-        setExchangeRate(
-          Number(result.rate)
-        );
-      } catch (error) {
-        console.error(
-          "Failed to load subscription exchange rate:",
-          error
-        );
-
-        toast.error(
-          "Unable to load current currency conversion."
-        );
-
-        setExchangeRate(1);
-      } finally {
-        setRateLoading(false);
-      }
-    }
-
-    loadExchangeRate();
-  }, [currency]);
+  function formatPlanPrice(
+    canonicalPrice: number
+  ) {
+    return formatSubscriptionPrice(
+      canonicalPrice,
+      currency,
+      exchangeRate
+    );
+  }
 
   if (loading) {
     return <p>Loading...</p>;
@@ -129,16 +83,12 @@ export default function SubscriptionSettings() {
         return;
       }
 
-      const result =
-        await initializeSubscriptionPayment({
-          businessId: business.id,
-          planId,
-          billingCycle,
-          customerName: business.name,
-        });
-
       window.location.href =
-        result.paymentLink;
+        `/subscription/payment/checkout?plan=${encodeURIComponent(
+          planId
+        )}&billingCycle=${encodeURIComponent(
+          billingCycle
+        )}`;
     } catch (error) {
       console.error(error);
 
@@ -152,83 +102,55 @@ export default function SubscriptionSettings() {
     }
   }
 
-  const currencySymbols: Record<string, string> = {
-    NGN: "₦",
-    USD: "$",
-    GHS: "GH₵",
-    KES: "KSh",
-  };
-
-  const currencySymbol =
-    currencySymbols[currency] ??
-    currency;
-
-  function formatPlanPrice(
-    canonicalPrice: number
-  ) {
-    if (canonicalPrice === 0) {
-      return "Free";
-    }
-
-    const convertedPrice =
-      canonicalPrice * exchangeRate;
-
-    return `${currencySymbol}${Number(
-      convertedPrice.toFixed(2)
-    ).toLocaleString()}`;
-  }
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-5 sm:space-y-8">
       <div>
-        <h2 className="text-2xl font-bold">
+        <h2 className="text-xl font-bold sm:text-2xl">
           Subscription
         </h2>
 
-        <p className="mt-2 text-gray-500">
+        <p className="mt-1.5 text-sm text-gray-500 sm:mt-2">
           Manage your Vendora plan.
         </p>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <span className="text-xs font-medium text-gray-700 sm:text-sm">
+          Billing cycle:
+        </span>
 
-<div className="flex flex-wrap items-center gap-3">
-  <span className="text-sm font-medium text-gray-700">
-    Billing cycle:
-  </span>
+        <div className="inline-flex rounded-lg border bg-white p-0.5 sm:rounded-xl sm:p-1">
+          <button
+            type="button"
+            onClick={() =>
+              setBillingCycle("monthly")
+            }
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition sm:rounded-lg sm:px-4 sm:py-2 sm:text-sm ${
+              billingCycle === "monthly"
+                ? "bg-emerald-600 text-white"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Monthly
+          </button>
 
-  <div className="inline-flex rounded-xl border bg-white p-1">
-    <button
-      type="button"
-      onClick={() =>
-        setBillingCycle("monthly")
-      }
-      className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-        billingCycle === "monthly"
-          ? "bg-emerald-600 text-white"
-          : "text-gray-600 hover:text-gray-900"
-      }`}
-    >
-      Monthly
-    </button>
+          <button
+            type="button"
+            onClick={() =>
+              setBillingCycle("yearly")
+            }
+            className={`rounded-md px-3 py-1.5 text-xs font-medium transition sm:rounded-lg sm:px-4 sm:py-2 sm:text-sm ${
+              billingCycle === "yearly"
+                ? "bg-emerald-600 text-white"
+                : "text-gray-600 hover:text-gray-900"
+            }`}
+          >
+            Yearly
+          </button>
+        </div>
+      </div>
 
-    <button
-      type="button"
-      onClick={() =>
-        setBillingCycle("yearly")
-      }
-      className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
-        billingCycle === "yearly"
-          ? "bg-emerald-600 text-white"
-          : "text-gray-600 hover:text-gray-900"
-      }`}
-    >
-      Yearly
-    </button>
-  </div>
-</div>
-
-
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2 xl:grid-cols-4">
         {plans.map((plan) => {
           const isCurrent =
             plan.id === currentSubscription.plan_id;
@@ -236,30 +158,30 @@ export default function SubscriptionSettings() {
           return (
             <div
               key={plan.id}
-              className={`relative flex flex-col rounded-2xl border bg-white p-6 shadow-sm ${
+              className={`relative flex flex-col rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6 ${
                 isCurrent
                   ? "border-emerald-500 ring-2 ring-emerald-100"
                   : "border-gray-200"
               }`}
             >
               {isCurrent && (
-                <span className="absolute right-4 top-4 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                <span className="absolute right-3 top-3 rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold text-emerald-700 sm:right-4 sm:top-4 sm:px-3 sm:text-xs">
                   Current Plan
                 </span>
               )}
 
               <div>
-                <h3 className="text-xl font-bold">
+                <h3 className="text-lg font-bold sm:text-xl">
                   {plan.name}
                 </h3>
 
-                <p className="mt-2 min-h-[48px] text-sm text-gray-500">
+                <p className="mt-1.5 min-h-[40px] text-xs text-gray-500 sm:mt-2 sm:min-h-[48px] sm:text-sm">
                   {plan.description}
                 </p>
               </div>
 
-              <div className="mt-6">
-                <p className="text-3xl font-bold">
+              <div className="mt-4 sm:mt-6">
+                <p className="text-2xl font-bold sm:text-3xl">
                   {rateLoading
                     ? "Loading..."
                     : formatPlanPrice(
@@ -272,7 +194,7 @@ export default function SubscriptionSettings() {
                 </p>
 
                 {plan.monthly_price > 0 && (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs text-gray-500 sm:text-sm">
                     per{" "}
                     {billingCycle === "monthly"
                       ? "month"
@@ -281,7 +203,7 @@ export default function SubscriptionSettings() {
                 )}
               </div>
 
-              <div className="mt-6 flex-1 space-y-3 text-sm text-gray-600">
+              <div className="mt-4 flex-1 space-y-2 text-xs text-gray-600 sm:mt-6 sm:space-y-3 sm:text-sm">
                 <p>
                   Storage:{" "}
                   <strong>

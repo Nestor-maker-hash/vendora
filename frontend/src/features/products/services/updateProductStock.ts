@@ -1,4 +1,6 @@
-import { supabase } from "@/src/lib/supabase";
+import "server-only";
+
+import { supabaseServer } from "@/src/lib/supabaseServer";
 import { getBusinessById } from "@/src/features/business/services/getBusinessById";
 import { notifyLowStock } from "@/src/features/notifications/services/notifyLowStock";
 
@@ -6,80 +8,98 @@ export async function updateProductStock(
   productId: string,
   quantityChange: number
 ) {
-  const { data: product, error } = await supabase
-    .from("products")
-    .select(
-      "id, business_id, name, stock, minimum_order_quantity"
-    )
-    .eq("id", productId)
-    .single();
+  if (!productId) {
+    throw new Error("Product ID is required.");
+  }
 
-  if (error) throw error;
-
-  const currentStock = product.stock;
-  const newStock = currentStock + quantityChange;
-
-  console.log({
-    productId,
-    currentStock,
-    quantityChange,
-    newStock,
-    minimumOrderQuantity:
-      product.minimum_order_quantity,
-  });
-
-  if (newStock < 0) {
+  if (
+    !Number.isInteger(quantityChange) ||
+    quantityChange === 0
+  ) {
     throw new Error(
-      "Not enough stock available."
+      "Stock quantity change must be a non-zero integer."
     );
   }
 
-  const { error: updateError } = await supabase
-    .from("products")
-    .update({
-      stock: newStock,
-    })
-    .eq("id", productId);
+  /*
+   * Perform the stock change atomically inside PostgreSQL.
+   *
+   * This prevents race conditions where two orders read the
+   * same stock value and both successfully write a new value.
+   *
+   * The database function also rejects changes that would make
+   * stock negative.
+   */
+  const { data: result, error: stockError } =
+    await supabaseServer.rpc(
+      "update_product_stock_atomic",
+      {
+        p_product_id: productId,
+        p_quantity_change: quantityChange,
+      }
+    );
 
-  if (updateError) {
-    console.error(updateError);
-    throw updateError;
+  if (stockError) {
+    if (
+      stockError.message
+        .toLowerCase()
+        .includes("not enough stock")
+    ) {
+      throw new Error(
+        "Not enough stock available."
+      );
+    }
+
+    throw stockError;
   }
 
   /*
-   * Low-stock alerts are based on each product's
-   * own minimum order quantity.
-   *
-   * A minimum of 1 is the default and does NOT
-   * create a low-stock threshold.
-   *
-   * Example:
-   *
-   * minimum = 20
-   * 21 → 20 = no alert
-   * 20 → 19 = alert
-   * 19 → 18 = no duplicate alert
+   * The RPC returns the updated product information.
+   * We use it to determine whether this stock change crossed
+   * the product's low-stock threshold.
    */
-  const minimumOrderQuantity =
-    product.minimum_order_quantity ?? 1;
+  const updatedProduct =
+    Array.isArray(result)
+      ? result[0]
+      : result;
 
+  if (!updatedProduct) {
+    throw new Error(
+      "Stock was updated but the updated product could not be confirmed."
+    );
+  }
+
+  const newStock =
+    Number(updatedProduct.stock);
+
+  const previousStock =
+    newStock - quantityChange;
+
+  const minimumOrderQuantity =
+    updatedProduct.minimum_order_quantity ?? 1;
+
+  /*
+   * Only alert when crossing from at/above the threshold
+   * to below it.
+   */
   const crossedLowStockThreshold =
     minimumOrderQuantity > 1 &&
-    currentStock >= minimumOrderQuantity &&
+    previousStock >= minimumOrderQuantity &&
     newStock < minimumOrderQuantity;
 
   if (crossedLowStockThreshold) {
     try {
-      const business = await getBusinessById(
-        product.business_id
-      );
+      const business =
+        await getBusinessById(
+          updatedProduct.business_id
+        );
 
       await notifyLowStock(
         business.id,
         business.name,
-        product.name,
+        updatedProduct.name,
         newStock,
-        product.id
+        updatedProduct.id
       );
     } catch (err) {
       console.error(
@@ -88,4 +108,6 @@ export async function updateProductStock(
       );
     }
   }
+
+  return updatedProduct;
 }

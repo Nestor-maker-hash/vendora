@@ -4,6 +4,7 @@ interface UpdateProductData {
   name: string;
   description: string;
   price: number;
+  merchant_price: number;
   stock: number;
   minimum_order_quantity: number;
   image_url?: string | null;

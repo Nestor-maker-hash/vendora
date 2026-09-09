@@ -1,87 +1,137 @@
-// src/features/analytics/services/getAnalytics.ts
 import { supabase } from "@/src/lib/supabase";
 import { getCurrentBusiness } from "@/src/features/business/services/getCurrentBusiness";
 
 export async function getAnalytics() {
   const business = await getCurrentBusiness();
 
-  const { data: products, error: productsError } = await supabase
-    .from("products")
-    .select("id, stock")
-    .eq("business_id", business.id);
+  const { data: products, error: productsError } =
+    await supabase
+      .from("products")
+      .select("id, stock")
+      .eq("business_id", business.id);
 
   if (productsError) throw productsError;
 
-  // Step 1 — Select created_at alongside total, customer_phone, and status
-  const { data: orders, error: ordersError } = await supabase
-    .from("orders")
-    .select("total, customer_phone, status, created_at")
-    .eq("business_id", business.id);
+  const { data: orders, error: ordersError } =
+    await supabase
+      .from("orders")
+      .select(
+        "total, customer_phone, status, created_at"
+      )
+      .eq("business_id", business.id);
 
   if (ordersError) throw ordersError;
 
-  const productCount = products?.length ?? 0;
-  const orderCount = orders?.length ?? 0;
+  const allOrders = orders ?? [];
+  const allProducts = products ?? [];
 
-  const revenue =
-    orders
-      ?.filter((order) => order.status === "delivered")
-      .reduce(
-        (sum, order) => sum + Number(order.total),
-        0
-      ) ?? 0;
+  const deliveredOrders = allOrders.filter(
+    (order) => order.status === "delivered"
+  );
+
+  const revenue = deliveredOrders.reduce(
+    (sum, order) => sum + Number(order.total),
+    0
+  );
 
   const customers = new Set(
-    orders?.map((order) => order.customer_phone)
+    allOrders
+      .map((order) => order.customer_phone)
+      .filter(Boolean)
   ).size;
 
-  const completedOrders =
-    orders?.filter(
-      (order) => order.status === "delivered"
-    ).length ?? 0;
+  const completedOrders = deliveredOrders.length;
 
-  const pendingOrders =
-    orders?.filter(
-      (order) => order.status !== "delivered"
-    ).length ?? 0;
+  const pendingOrders = allOrders.filter(
+    (order) =>
+      order.status !== "delivered" &&
+      order.status !== "cancelled"
+  ).length;
 
+  // Average value is based on completed orders only.
   const averageOrderValue =
-    orderCount === 0 ? 0 : revenue / orderCount;
+    completedOrders === 0
+      ? 0
+      : revenue / completedOrders;
 
-  const lowStockProducts =
-    products?.filter(
-      (product) => product.stock <= 5
-    ).length ?? 0;
+  const lowStockProducts = allProducts.filter(
+    (product) => Number(product.stock) <= 5
+  ).length;
 
-  // Step 2 — Build revenue history map grouped by day (YYYY-MM-DD)
-  const revenueHistoryMap = new Map<string, number>();
+  /*
+   * Build the complete daily revenue history.
+   *
+   * The chart decides which range to display:
+   * 1D / 7D / 14D / 30D / All.
+   *
+   * Every day between the first delivered order and today
+   * is included, even when revenue is zero.
+   */
 
-  orders
-    ?.filter((order) => order.status === "delivered")
-    .forEach((order) => {
-      const day = new Date(order.created_at)
+  const revenueMap = new Map<string, number>();
+
+  for (const order of deliveredOrders) {
+    const date = new Date(order.created_at)
+      .toISOString()
+      .split("T")[0];
+
+    revenueMap.set(
+      date,
+      (revenueMap.get(date) ?? 0) +
+        Number(order.total)
+    );
+  }
+
+  const revenueHistory: {
+    date: string;
+    revenue: number;
+  }[] = [];
+
+  if (deliveredOrders.length > 0) {
+    const dates = deliveredOrders
+      .map((order) =>
+        new Date(order.created_at)
+          .toISOString()
+          .split("T")[0]
+      )
+      .sort();
+
+    const start = new Date(
+      `${dates[0]}T00:00:00Z`
+    );
+
+    const today = new Date();
+
+    today.setUTCHours(
+      0,
+      0,
+      0,
+      0
+    );
+
+    const cursor = new Date(start);
+
+    while (cursor <= today) {
+      const date = cursor
         .toISOString()
         .split("T")[0];
 
-      revenueHistoryMap.set(
-        day,
-        (revenueHistoryMap.get(day) ?? 0) + Number(order.total)
+      revenueHistory.push({
+        date,
+        revenue: revenueMap.get(date) ?? 0,
+      });
+
+      cursor.setUTCDate(
+        cursor.getUTCDate() + 1
       );
-    });
+    }
+  }
 
-  const revenueHistory = Array.from(revenueHistoryMap.entries()).map(
-    ([date, revenue]) => ({
-      date,
-      revenue,
-    })
-  );
-
-  // Step 3 — Return the metrics along with the historical trend data
   return {
     revenue,
-    orders: orderCount,
+    orders: allOrders.length,
     customers,
-    products: productCount,
+    products: allProducts.length,
     completedOrders,
     pendingOrders,
     averageOrderValue,
@@ -89,4 +139,3 @@ export async function getAnalytics() {
     revenueHistory,
   };
 }
-

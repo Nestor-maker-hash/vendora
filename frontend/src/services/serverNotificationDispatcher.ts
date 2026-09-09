@@ -45,15 +45,18 @@ export async function dispatchNotificationServer(
     if (shouldSendWhatsApp && business.phone) {
       if (data.whatsapp) {
         const templateData: WhatsAppTemplateMessage = {
-          to: business.phone,
-          template: data.whatsapp.template,
-          variables: [
-            business.name,
-            ...data.whatsapp.variables,
-          ],
-          buttonVariables:
-            data.whatsapp.buttonVariables,
-        };
+  to: business.phone,
+  template: data.whatsapp.template,
+  variables:
+    data.type === NotificationType.WELCOME
+      ? data.whatsapp.variables
+      : [
+          business.name,
+          ...data.whatsapp.variables,
+        ],
+  buttonVariables:
+    data.whatsapp.buttonVariables,
+};
 
         await sendWhatsAppTemplate(
           templateData

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import SettingsSidebar from "./SettingsSidebar";
 import StorefrontSettings from "./StorefrontSettings";
@@ -23,6 +23,8 @@ const sectionMap: Record<string, string> = {
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const section = searchParams.get("section");
@@ -33,6 +35,20 @@ export default function SettingsPage() {
       : "Storefront";
 
   const [current, setCurrent] = useState(initialSection);
+
+  function handleSectionChange(nextSection: string) {
+    setCurrent(nextSection);
+
+    const key = Object.entries(sectionMap).find(
+      ([, label]) => label === nextSection
+    )?.[0];
+
+    if (key) {
+      router.replace(`${pathname}?section=${key}`, {
+        scroll: false,
+      });
+    }
+  }
 
   useEffect(() => {
     const requestedSection = searchParams.get("section");
@@ -46,13 +62,13 @@ export default function SettingsPage() {
   }, [searchParams]);
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
+    <div className="grid min-w-0 gap-3 sm:gap-6 lg:grid-cols-[240px_1fr] xl:grid-cols-[280px_1fr]">
       <SettingsSidebar
         current={current}
-        onChange={setCurrent}
+        onChange={handleSectionChange}
       />
 
-      <div>
+      <div className="min-w-0">
         {current === "Storefront" && (
           <StorefrontSettings />
         )}

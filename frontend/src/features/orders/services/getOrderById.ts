@@ -1,4 +1,4 @@
-import { supabase } from "@/src/lib/supabase";
+import { createSupabaseServerAuthClient } from "@/src/lib/supabaseServerAuth";
 import { Order } from "../types/order";
 import { OrderItem } from "../types/orderItem";
 
@@ -19,6 +19,8 @@ business: {
 
   }
 > {
+  const supabase = await createSupabaseServerAuthClient();
+
   const { data: order, error } = await supabase
     .from("orders")
     .select(`

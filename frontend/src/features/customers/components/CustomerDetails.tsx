@@ -18,8 +18,47 @@ const { currency } = useBusiness();
 
   if (loading) {
     return (
-      <div className="rounded-2xl border bg-white p-8 text-center">
-        Loading customer...
+      <div className="space-y-5 sm:space-y-8">
+        <div className="space-y-2">
+          <div className="h-7 w-40 animate-pulse rounded bg-gray-200 sm:h-9 sm:w-52" />
+          <div className="h-4 w-28 animate-pulse rounded bg-gray-100" />
+          <div className="h-4 w-36 animate-pulse rounded bg-gray-100" />
+        </div>
+
+        <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="rounded-2xl border bg-white p-4 shadow-sm sm:p-5"
+            >
+              <div className="h-4 w-24 animate-pulse rounded bg-gray-200" />
+              <div className="mt-3 h-8 w-16 animate-pulse rounded bg-gray-200" />
+            </div>
+          ))}
+        </div>
+
+        <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+          <div className="mb-5 h-6 w-32 animate-pulse rounded bg-gray-200" />
+
+          <div className="space-y-3">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <div
+                key={index}
+                className="flex items-center justify-between rounded-xl border p-3 sm:p-4"
+              >
+                <div className="space-y-2">
+                  <div className="h-4 w-28 animate-pulse rounded bg-gray-200" />
+                  <div className="h-3 w-20 animate-pulse rounded bg-gray-100" />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="ml-auto h-4 w-20 animate-pulse rounded bg-gray-200" />
+                  <div className="ml-auto h-3 w-14 animate-pulse rounded bg-gray-100" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -33,21 +72,21 @@ const { currency } = useBusiness();
   }
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-5 sm:space-y-8">
 
       {/* Customer Information */}
 
       <div>
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-2xl font-bold sm:text-3xl">
           {data.customer.name}
         </h1>
 
-        <p className="mt-2 text-gray-500">
+        <p className="mt-1 text-sm text-gray-500 sm:mt-2 sm:text-base">
           {data.customer.phone}
         </p>
 
         {data.customer.email && (
-          <p className="text-gray-500">
+          <p className="text-sm text-gray-500 sm:text-base">
             {data.customer.email}
           </p>
         )}
@@ -55,19 +94,19 @@ const { currency } = useBusiness();
 
       {/* Statistics */}
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
 
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
           <p className="text-sm text-gray-500">
             Total Orders
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold">
+          <h2 className="mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
             {data.stats.totalOrders}
           </h2>
         </div>
 
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
           <p className="text-sm text-gray-500">
             Lifetime Value
           </p>
@@ -77,22 +116,22 @@ const { currency } = useBusiness();
           </h2>
         </div>
 
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
           <p className="text-sm text-gray-500">
             Completed Orders
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold">
+          <h2 className="mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
             {data.stats.completedOrders}
           </h2>
         </div>
 
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
           <p className="text-sm text-gray-500">
             Pending Orders
           </p>
 
-          <h2 className="mt-2 text-3xl font-bold">
+          <h2 className="mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
             {data.stats.pendingOrders}
           </h2>
         </div>
@@ -101,21 +140,21 @@ const { currency } = useBusiness();
 
       {/* Order History */}
 
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
 
-        <h2 className="mb-6 text-xl font-semibold">
+        <h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">
           Order History
         </h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
 
           {data.orders.map((order: Order) => (
             <Link
               key={order.id}
               href={`/dashboard/orders/${order.id}`}
-              className="flex items-center justify-between rounded-xl border p-4 transition hover:bg-gray-50"
+              className="flex min-w-0 items-center justify-between gap-3 rounded-xl border p-3 transition hover:bg-gray-50 sm:p-4"
             >
-              <div>
+              <div className="min-w-0">
                 <p className="font-semibold">
                   Order #{order.id.slice(0, 8)}
                 </p>
@@ -127,7 +166,7 @@ const { currency } = useBusiness();
                 </p>
               </div>
 
-              <div className="text-right">
+              <div className="min-w-0 text-right">
                 <p className="font-semibold">
                   {formatCurrency(order.total, currency)}
                 </p>

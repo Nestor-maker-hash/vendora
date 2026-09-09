@@ -51,21 +51,9 @@ export async function subscribeToPush(): Promise<PushSubscription> {
     await registerPushServiceWorker();
 
 
-  let permission =
-    Notification.permission;
-
-
-  if (permission !== "granted") {
-
-    permission =
-      await requestPushPermission();
-  }
-
-
-  if (permission !== "granted") {
-
+  if (Notification.permission !== "granted") {
     throw new Error(
-      "Push notification permission was not granted."
+      "Push notification permission must be granted before subscribing."
     );
   }
 

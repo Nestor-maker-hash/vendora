@@ -17,39 +17,39 @@ import {
 const features = [
   {
     icon: Globe2,
-    title: "Your own online store",
+    title: "Online storefront",
     description:
-      "Give your business a professional storefront customers can visit from anywhere.",
+      "Create a professional storefront where customers can discover your products and place orders from anywhere.",
   },
   {
     icon: ClipboardList,
-    title: "Orders in one place",
+    title: "Orders & sales",
     description:
-      "Stop searching through WhatsApp messages. Manage every order from one dashboard.",
+      "Manage your sales and orders from one connected workspace, from checkout to fulfillment.",
   },
   {
     icon: Package,
-    title: "Simple inventory",
+    title: "Inventory management",
     description:
-      "Know what you have in stock and keep your product catalogue organized.",
+      "Track products, stock levels and your catalogue so you always know what is available.",
   },
   {
     icon: Users,
     title: "Customer management",
     description:
-      "Keep track of your customers and build relationships beyond individual orders.",
+      "Keep customer information organized and build lasting relationships beyond individual transactions.",
   },
   {
     icon: BarChart3,
-    title: "Business insights",
+    title: "Business intelligence",
     description:
-      "Understand how your business is performing with useful sales and business data.",
+      "Turn your business activity into useful insights so you can understand performance and make better decisions.",
   },
   {
     icon: Globe2,
-    title: "Built for African businesses",
+    title: "Built for African commerce",
     description:
-      "Designed around the way small businesses across Africa actually sell.",
+      "Designed around the realities of commerce across African markets, from payments to delivery.",
   },
 ];
 
@@ -165,20 +165,19 @@ export default function Home() {
           <div className="mx-auto max-w-4xl text-center">
             <div className="mb-7 inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-4 py-2 text-sm font-medium text-emerald-700">
               <Zap size={15} />
-              Commerce OS for African businesses
+              Commerce infrastructure for modern businesses
             </div>
 
             <h1 className="text-4xl font-extrabold leading-[1.08] tracking-tight text-gray-950 sm:text-6xl lg:text-7xl">
-              Turn your business into a{" "}
+              Everything you need to{" "}
               <span className="text-emerald-600">
-                business that runs.
+                sell, manage, and grow.
               </span>
             </h1>
 
             <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-gray-600 sm:text-xl sm:leading-8">
-              Vendora gives small businesses the tools to manage
-              products, customers, inventory, orders and online
-              sales — all from one simple platform.
+              Vendora brings your storefront, products, orders, customers, payments,
+              inventory and business operations into one connected platform.
             </p>
 
             <div className="mt-9 flex flex-col justify-center gap-3 sm:flex-row">

@@ -1,6 +1,5 @@
 export type PaymentMethod =
-  | "paystack"
-  | "bank_transfer"
+  | "online_payment"
   | "pay_on_delivery";
 
 export type PaymentStatus =
@@ -34,6 +33,11 @@ export interface Order {
   subtotal: number;
   delivery_fee: number;
   total: number;
+
+  customer_fee: number;
+  merchant_fee: number;
+  logistics_fee: number;
+  paystack_fee: number;
 
   status: OrderStatus;
 

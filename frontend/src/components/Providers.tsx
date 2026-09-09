@@ -5,6 +5,9 @@ import { CartProvider } from "@/src/features/cart/context/CartContext";
 import { Toaster } from "react-hot-toast";
 import RealtimeNotifications from "./RealtimeNotifications";
 import PushNotificationProvider from "./PushNotificationProvider";
+import PushNotificationBanner from "./PushNotificationBanner";
+import PWAInstallPrompt from "./PWAInstallPrompt";
+import CustomerNavigation from "./layout/CustomerNavigation";
 
 export default function Providers({
   children,
@@ -15,6 +18,7 @@ export default function Providers({
     <SidebarProvider>
       <CartProvider>
 	<PushNotificationProvider />
+        <PushNotificationBanner />
 	<RealtimeNotifications />
         <Toaster
           position="top-right"
@@ -24,6 +28,7 @@ export default function Providers({
         />
 
         {children}
+        <CustomerNavigation />
 
       </CartProvider>
     </SidebarProvider>

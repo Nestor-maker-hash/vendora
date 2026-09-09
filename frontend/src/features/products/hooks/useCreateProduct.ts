@@ -7,11 +7,13 @@ export function useCreateProduct() {
   const [loading, setLoading] = useState(false);
 
   async function addProduct(input: {
-    name: string;
-    description?: string;
-    price: number;
-    stock: number;
-  }) {
+  name: string;
+  description?: string;
+  price: number;
+  stock: number;
+  minimum_order_quantity?: number;
+  image_url?: string;
+}) {
     setLoading(true);
 
     try {

@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
+import { getBusinessAfterLogin } from "@/src/features/auth/services/getBusinessAfterLogin";
 import toast from "react-hot-toast";
 import {
   isPushNotificationSupported,
@@ -12,11 +13,122 @@ import {
 
 export default function PushNotificationBanner() {
   const [loading, setLoading] = useState(false);
-  const [enabled, setEnabled] = useState(
-    typeof window !== "undefined" &&
-      "Notification" in window &&
-      Notification.permission === "granted"
-  );
+  const [authenticated, setAuthenticated] = useState(false);
+  const [hasBusiness, setHasBusiness] = useState(false);
+  const [permission, setPermission] =
+    useState<NotificationPermission | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function checkNotificationState() {
+      if (!isPushNotificationSupported()) {
+        return;
+      }
+
+      setPermission(Notification.permission);
+
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!session?.user) {
+        setAuthenticated(false);
+        setHasBusiness(false);
+        return;
+      }
+
+      setAuthenticated(true);
+
+      try {
+        const business = await getBusinessAfterLogin(
+          session.user.id
+        );
+
+        if (mounted) {
+          setHasBusiness(!!business);
+        }
+      } catch (error) {
+        console.error(
+          "Failed to check notification business:",
+          error
+        );
+
+        if (mounted) {
+          setHasBusiness(false);
+        }
+      }
+    }
+
+    void checkNotificationState();
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void checkNotificationState();
+      }
+    }
+
+    window.addEventListener(
+      "focus",
+      handleVisibilityChange
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session?.user) {
+          setAuthenticated(false);
+          setHasBusiness(false);
+          return;
+        }
+
+        setAuthenticated(true);
+
+        void getBusinessAfterLogin(session.user.id)
+          .then((business) => {
+            if (mounted) {
+              setHasBusiness(!!business);
+            }
+          })
+          .catch((error) => {
+            console.error(
+              "Failed to check notification business:",
+              error
+            );
+
+            if (mounted) {
+              setHasBusiness(false);
+            }
+          });
+      }
+    );
+
+    return () => {
+      mounted = false;
+
+      window.removeEventListener(
+        "focus",
+        handleVisibilityChange
+      );
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+
+      subscription.unsubscribe();
+    };
+  }, []);
 
   async function enableNotifications() {
     try {
@@ -29,10 +141,12 @@ export default function PushNotificationBanner() {
         return;
       }
 
-      const permission =
+      const nextPermission =
         await requestPushPermission();
 
-      if (permission !== "granted") {
+      setPermission(nextPermission);
+
+      if (nextPermission !== "granted") {
         toast.error(
           "Notification permission was not granted."
         );
@@ -52,20 +166,6 @@ export default function PushNotificationBanner() {
       if (!session?.access_token) {
         throw new Error("You must be logged in.");
       }
-
-      console.log(
-        "PUSH PAYLOAD BEFORE API:",
-        JSON.stringify({
-          subscription: serialized,
-          platform:
-            /iPhone|iPad|iPod/i.test(navigator.userAgent)
-              ? "ios"
-              : /Android/i.test(navigator.userAgent)
-                ? "android"
-                : "web",
-          userAgent: navigator.userAgent,
-        })
-      );
 
       const response = await fetch(
         "/api/push/subscribe",
@@ -93,15 +193,21 @@ export default function PushNotificationBanner() {
       );
 
       if (!response.ok) {
+        const errorBody = await response.text();
+
+        console.error(
+          "Push subscription API error:",
+          response.status,
+          errorBody
+        );
+
         throw new Error(
-          "Failed to save subscription."
+          "Failed to save notification subscription."
         );
       }
 
-      setEnabled(true);
-
       toast.success(
-        "Order & offer alerts are now enabled."
+        "Notifications are now enabled."
       );
     } catch (error) {
       console.error(
@@ -117,55 +223,61 @@ export default function PushNotificationBanner() {
     }
   }
 
-  if (enabled) {
+  if (
+    !authenticated ||
+    !hasBusiness ||
+    !isPushNotificationSupported() ||
+    permission === "granted"
+  ) {
     return null;
   }
 
-  if (
-    typeof window !== "undefined" &&
-    "Notification" in window &&
-    Notification.permission === "denied"
-  ) {
+  if (permission === "denied") {
     return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+      <div className="fixed bottom-4 left-4 right-4 z-[90] mx-auto max-w-md rounded-2xl border border-amber-200 bg-amber-50 p-4 shadow-xl">
         <h3 className="font-semibold text-amber-900">
           Notifications are blocked
         </h3>
 
-        <p className="mt-1 text-sm text-amber-700">
-          Vendora cannot send order alerts because
-          notification permission is blocked in your
-          browser settings.
+        <p className="mt-1 text-sm leading-5 text-amber-700">
+          Vendora cannot send order alerts while
+          notifications are blocked. Enable notifications
+          for Vendora in your browser or device settings.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 className="font-semibold text-gray-900">
-            Enable Order & Offer Alerts
-          </h3>
-
-          <p className="mt-1 text-sm text-gray-600">
-            Get instant alerts for new orders, payments,
-            low stock and important store updates.
-          </p>
+    <div className="fixed bottom-4 left-4 right-4 z-[90] mx-auto max-w-md rounded-2xl border border-emerald-100 bg-white p-4 shadow-2xl">
+      <div className="flex items-start gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-lg">
+          🔔
         </div>
 
-        <button
-          type="button"
-          onClick={enableNotifications}
-          disabled={loading}
-          className="shrink-0 rounded-xl bg-emerald-600 px-5 py-3 font-medium text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loading
-            ? "Enabling..."
-            : "Enable Notifications"}
-        </button>
+        <div className="min-w-0 flex-1">
+          <h3 className="font-semibold text-slate-900">
+            Turn on Vendora notifications
+          </h3>
+
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Get instant alerts for new orders, payments,
+            low stock and important business updates.
+          </p>
+
+          <button
+            type="button"
+            onClick={enableNotifications}
+            disabled={loading}
+            className="mt-3 rounded-xl bg-emerald-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {loading
+              ? "Enabling..."
+              : "Allow Notifications"}
+          </button>
+        </div>
       </div>
     </div>
   );
+
 }

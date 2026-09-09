@@ -66,30 +66,24 @@ export default function ProductDetails({
   }
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-4">
       <div>
-        <h1 className="text-3xl font-semibold text-gray-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-slate-900 sm:text-3xl">
           {product.name}
         </h1>
 
         {isLocked && (
-          <div className="mt-3 rounded-xl bg-gray-100 p-3 text-sm font-medium text-gray-600">
+          <div className="mt-2 rounded-xl border border-slate-200 bg-slate-50 p-2.5 text-xs font-medium text-slate-600">
             This product is currently unavailable.
           </div>
         )}
 
-        {isLocked && (
-          <div className="mt-3 rounded-xl bg-gray-100 p-3 text-sm font-medium text-gray-600">
-            This product is currently unavailable.
-          </div>
-        )}
-
-        <p className="mt-3 text-4xl font-bold text-emerald-600">
+        <p className="mt-2 text-3xl font-bold tracking-tight text-emerald-600 sm:text-4xl">
           {formatCurrency(product.price, currency)}
         </p>
 
         {minimumQuantity > 1 && (
-          <p className="mt-2 text-sm text-gray-500">
+          <p className="mt-1.5 text-xs text-slate-500">
             Minimum order: {minimumQuantity} units
           </p>
         )}
@@ -97,18 +91,18 @@ export default function ProductDetails({
 
       <div>
         {product.stock > 0 ? (
-          <span className="inline-flex rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700">
+          <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
             ✓ {product.stock} in stock
           </span>
         ) : (
-          <span className="inline-flex rounded-full bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700">
+          <span className="inline-flex rounded-full bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-700">
             Out of Stock
           </span>
         )}
       </div>
 
       {!canOrder && product.stock > 0 && (
-        <div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-700">
+        <div className="rounded-xl border border-amber-100 bg-amber-50 p-2.5 text-xs text-amber-700">
           Only {product.stock} available. The minimum order is{" "}
           {minimumQuantity}.
         </div>
@@ -116,40 +110,40 @@ export default function ProductDetails({
 
       {product.description && (
         <div>
-          <h2 className="mb-2 text-base font-semibold text-gray-900">
+          <h2 className="mb-1.5 text-sm font-semibold text-slate-900">
             Description
           </h2>
 
-          <p className="text-sm leading-6 text-gray-600">
+          <p className="text-xs leading-5 text-slate-600 sm:text-sm">
             {product.description}
           </p>
         </div>
       )}
 
       {canOrder && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2.5">
           <div>
-            <p className="mb-2 text-sm font-medium text-gray-700">
+            <p className="mb-1.5 text-xs font-semibold text-slate-700">
               Quantity
             </p>
 
-            <div className="flex w-full items-center justify-between rounded-xl border bg-white px-4 py-3">
+            <div className="flex w-full items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5 shadow-sm">
               <button
                 type="button"
                 onClick={decreaseQuantity}
                 disabled={quantity <= minimumQuantity}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border text-2xl font-bold transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-xl font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 −
               </button>
 
               <div className="text-center">
-                <span className="text-xl font-semibold">
+                <span className="text-lg font-semibold text-slate-900">
                   {quantity}
                 </span>
 
                 {minimumQuantity > 1 && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-[10px] text-slate-500">
                     Minimum {minimumQuantity}
                   </p>
                 )}
@@ -159,7 +153,7 @@ export default function ProductDetails({
                 type="button"
                 onClick={increaseQuantity}
                 disabled={quantity >= product.stock}
-                className="flex h-10 w-10 items-center justify-center rounded-lg border text-2xl font-bold transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-xl font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 +
               </button>
@@ -169,7 +163,7 @@ export default function ProductDetails({
           <button
             type="button"
             onClick={handleAddToCart}
-            className="w-full rounded-xl bg-emerald-600 py-3.5 text-base font-medium text-white transition hover:bg-emerald-700"
+            className="w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-emerald-700 hover:shadow-md active:scale-[0.99]"
           >
             🛒 Add {quantity} to Cart
           </button>
@@ -180,7 +174,7 @@ export default function ProductDetails({
         show={showToast}
         title="Added to Cart"
         message={`${quantity} × ${product.name}`}
-        continueHref={`/store/${slug}`}
+        continueHref="/checkout"
       />
     </div>
   );

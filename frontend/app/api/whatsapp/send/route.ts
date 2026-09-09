@@ -7,7 +7,6 @@ export async function POST(
 ) {
   try {
     const body = await request.json();
-   console.log("API route reached");
     await sendWhatsApp({
       to: body.to,
       message: body.message,

@@ -54,19 +54,41 @@ export default function StoreProducts({
   }, [storefrontProducts, search]);
 
   return (
-    <>
+    <section>
+      <div className="mb-5 flex items-end justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-600">
+            Collection
+          </p>
+
+          <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+            Shop our products
+          </h2>
+        </div>
+
+        <p className="shrink-0 text-xs font-medium text-slate-400 sm:text-sm">
+          {filteredProducts.length}{" "}
+          {filteredProducts.length === 1 ? "product" : "products"}
+        </p>
+      </div>
+
       {filteredProducts.length === 0 ? (
-        <div className="rounded-xl border bg-white p-10 text-center">
-          <h2 className="text-xl font-semibold">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-2xl">
+            🔎
+          </div>
+
+          <h2 className="mt-5 text-xl font-semibold text-slate-900">
             No products found
           </h2>
 
-          <p className="mt-2 text-gray-500">
-            Try another search.
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-6 text-slate-500">
+            We couldn't find anything matching your search.
+            Try a different product name or keyword.
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
@@ -79,6 +101,6 @@ export default function StoreProducts({
           ))}
         </div>
       )}
-    </>
+    </section>
   );
 }

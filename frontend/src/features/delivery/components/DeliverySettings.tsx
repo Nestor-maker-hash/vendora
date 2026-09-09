@@ -103,7 +103,6 @@ export default function DeliverySettings() {
         toast.success("Delivery zone updated.");
       } else {
         const newZone = await createDeliveryZone({
-          businessId: business.id,
           location: trimmedLocation,
           price: numericPrice,
           freeDelivery,
@@ -160,21 +159,57 @@ export default function DeliverySettings() {
 
   if (businessLoading || loading) {
     return (
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="mb-2 text-xl font-semibold">
-          Delivery
-        </h2>
+      <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
+        <div className="mb-5 space-y-2 sm:mb-6">
+          <div className="h-6 w-24 animate-pulse rounded bg-gray-200" />
+          <div className="h-4 w-64 max-w-full animate-pulse rounded bg-gray-100" />
+        </div>
 
-        <p className="text-sm text-gray-500">
-          Loading delivery settings...
-        </p>
+        <div className="mb-5 space-y-3 sm:mb-6">
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4"
+            >
+              <div className="space-y-2">
+                <div className="h-4 w-32 animate-pulse rounded bg-gray-200" />
+                <div className="h-3 w-24 animate-pulse rounded bg-gray-100" />
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <div className="h-9 w-16 animate-pulse rounded-lg bg-gray-100" />
+                <div className="h-9 w-20 animate-pulse rounded-lg bg-gray-100" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t pt-5 sm:pt-6">
+          <div className="mb-4 h-5 w-40 animate-pulse rounded bg-gray-200" />
+
+          <div className="space-y-3 sm:space-y-4">
+            <div className="space-y-2">
+              <div className="h-4 w-20 animate-pulse rounded bg-gray-100" />
+              <div className="h-11 w-full animate-pulse rounded-xl bg-gray-100" />
+            </div>
+
+            <div className="space-y-2">
+              <div className="h-4 w-28 animate-pulse rounded bg-gray-100" />
+              <div className="h-11 w-full animate-pulse rounded-xl bg-gray-100" />
+            </div>
+
+            <div className="h-12 w-full animate-pulse rounded-xl bg-gray-100" />
+
+            <div className="h-11 w-40 animate-pulse rounded-xl bg-gray-200" />
+          </div>
+        </div>
       </div>
     );
   }
 
   if (!business) {
     return (
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
+      <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
         <h2 className="mb-2 text-xl font-semibold">
           Delivery
         </h2>
@@ -187,9 +222,9 @@ export default function DeliverySettings() {
   }
 
   return (
-    <div className="rounded-2xl border bg-white p-6 shadow-sm">
-      <div className="mb-6">
-        <h2 className="text-xl font-semibold">
+    <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+      <div className="mb-5 sm:mb-6">
+        <h2 className="text-lg font-semibold sm:text-xl">
           Delivery
         </h2>
 
@@ -199,11 +234,11 @@ export default function DeliverySettings() {
       </div>
 
       {zones.length > 0 && (
-        <div className="mb-6 space-y-3">
+        <div className="mb-5 space-y-3 sm:mb-6">
           {zones.map((zone) => (
             <div
               key={zone.id}
-              className="flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex min-w-0 flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4"
             >
               <div>
                 <p className="font-medium">
@@ -217,11 +252,11 @@ export default function DeliverySettings() {
                 </p>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => startEditing(zone)}
-                  className="rounded-lg border px-4 py-2 text-sm font-medium hover:bg-gray-50"
+                  className="rounded-lg border px-3 py-2 text-sm font-medium sm:px-4 hover:bg-gray-50"
                 >
                   Edit
                 </button>
@@ -229,7 +264,7 @@ export default function DeliverySettings() {
                 <button
                   type="button"
                   onClick={() => handleDelete(zone.id)}
-                  className="rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50"
+                  className="rounded-lg border border-red-200 px-3 py-2 text-sm font-medium text-red-600 sm:px-4 hover:bg-red-50"
                 >
                   Delete
                 </button>
@@ -240,7 +275,7 @@ export default function DeliverySettings() {
       )}
 
       {zones.length === 0 && (
-        <div className="mb-6 rounded-xl border border-dashed p-6 text-center">
+        <div className="mb-5 rounded-xl border border-dashed p-4 text-center sm:mb-6 sm:p-6">
           <p className="font-medium">
             No delivery zones yet
           </p>
@@ -251,14 +286,14 @@ export default function DeliverySettings() {
         </div>
       )}
 
-      <div className="border-t pt-6">
-        <h3 className="mb-4 text-lg font-semibold">
+      <div className="border-t pt-5 sm:pt-6">
+        <h3 className="mb-3 text-base font-semibold sm:mb-4 sm:text-lg">
           {editingId
             ? "Edit Delivery Zone"
             : "Add Delivery Zone"}
         </h3>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div>
             <label className="mb-1 block text-sm font-medium">
               Location
@@ -269,7 +304,7 @@ export default function DeliverySettings() {
               onChange={(e) => setLocation(e.target.value)}
               placeholder="e.g. Nsukka"
               disabled={saving}
-              className="w-full rounded-xl border p-3"
+              className="w-full max-w-full rounded-xl border p-3"
             />
           </div>
 
@@ -286,11 +321,11 @@ export default function DeliverySettings() {
               onChange={(e) => setPrice(e.target.value)}
               placeholder="e.g. 1000"
               disabled={saving || freeDelivery}
-              className="w-full rounded-xl border p-3 disabled:bg-gray-100"
+              className="w-full max-w-full rounded-xl border p-3 disabled:bg-gray-100"
             />
           </div>
 
-          <label className="flex cursor-pointer items-start gap-3">
+          <label className="flex cursor-pointer items-start gap-2 sm:gap-3">
             <input
               type="checkbox"
               checked={freeDelivery}
@@ -318,7 +353,7 @@ export default function DeliverySettings() {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition-opacity disabled:opacity-50"
+              className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-medium text-white transition-opacity disabled:opacity-50 sm:px-6 sm:text-base"
             >
               {saving
                 ? "Saving..."
@@ -332,7 +367,7 @@ export default function DeliverySettings() {
                 type="button"
                 onClick={resetForm}
                 disabled={saving}
-                className="rounded-xl border px-6 py-3 font-medium hover:bg-gray-50 disabled:opacity-50"
+                className="rounded-xl border px-4 py-3 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 sm:px-6 sm:text-base"
               >
                 Cancel
               </button>

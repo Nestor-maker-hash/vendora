@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description:
       "The commerce operating system for African businesses.",
 
-    start_url: "/",
+    start_url: "/pwa",
     scope: "/",
 
     display: "standalone",

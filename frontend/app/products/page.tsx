@@ -13,7 +13,10 @@ export default function ProductsPage() {
  const { products, loading, error, setProducts } = useProducts();
 
   const router = useRouter();
-  const { removeProduct } = useDeleteProduct();
+  const {
+  removeProduct,
+  loading: deleting,
+} = useDeleteProduct();
 const { currency } = useBusiness();
 
 async function handleDelete(id: string) {
@@ -21,7 +24,7 @@ async function handleDelete(id: string) {
     "Are you sure you want to delete this product?"
   );
 
-  if (!confirmed) return;
+  if (!confirmed || deleting) return;
 
   // Save current list in case we need to restore it
   const previousProducts = [...products];
@@ -47,37 +50,66 @@ async function handleDelete(id: string) {
       <DashboardLayout>
         <div>
           {/* Step 1: Improved Header Section with Add Product Action */}
-          <div className="mb-6 flex items-center justify-between">
-            <h1 className="text-3xl font-bold">Products</h1>
+          <div className="mb-4 flex items-center justify-between sm:mb-6">
+            <h1 className="text-2xl font-bold sm:text-3xl">Products</h1>
             <Link
               href="/products/new"
-              className="rounded-lg bg-emerald-600 px-5 py-3 font-semibold text-white transition hover:bg-emerald-700"
+              className="rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 sm:px-5 sm:py-3 sm:text-base"
             >
               + Add Product
             </Link>
           </div>
 
-          {loading && <p className="mt-6">Loading products...</p>}
+{loading && (
+  <div className="mt-4 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+    {Array.from({ length: 6 }).map((_, index) => (
+      <div
+        key={index}
+        className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm"
+      >
+        <div className="aspect-square animate-pulse bg-gray-200" />
+
+        <div className="space-y-3 p-4">
+          <div className="h-5 w-3/4 animate-pulse rounded bg-gray-200" />
+
+          <div className="h-4 w-full animate-pulse rounded bg-gray-200" />
+
+          <div className="h-4 w-2/3 animate-pulse rounded bg-gray-200" />
+
+          <div className="flex items-center justify-between pt-2">
+            <div className="h-6 w-24 animate-pulse rounded bg-gray-200" />
+            <div className="h-6 w-20 animate-pulse rounded-full bg-gray-200" />
+          </div>
+
+          <div className="flex gap-2 pt-2">
+            <div className="h-10 flex-1 animate-pulse rounded-lg bg-gray-200" />
+            <div className="h-10 flex-1 animate-pulse rounded-lg bg-gray-200" />
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
 
           {error && <p className="mt-6 text-red-500">{error}</p>}
 
           {/* Step 2: Improved Empty State */}
           {!loading && products.length === 0 && (
-            <div className="mt-12 rounded-xl border-2 border-dashed p-12 text-center">
-              <h2 className="text-2xl font-semibold">No products yet</h2>
-              <p className="mt-3 text-gray-500">
+            <div className="mt-8 rounded-xl border-2 border-dashed p-6 text-center sm:mt-12 sm:p-12">
+              <h2 className="text-xl font-semibold sm:text-2xl">No products yet</h2>
+              <p className="mt-2 text-sm text-gray-500 sm:mt-3">
                 Create your first product and start selling online.
               </p>
               <Link
                 href="/products/new"
-                className="mt-6 inline-block rounded-lg bg-emerald-600 px-6 py-3 text-white hover:bg-emerald-700"
+                className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2.5 text-sm text-white hover:bg-emerald-700 sm:mt-6 sm:px-6 sm:py-3 sm:text-base"
               >
                 Create First Product
               </Link>
             </div>
           )}
 {!loading && products.length > 0 && (
-  <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  <div className="mt-4 grid grid-cols-1 gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
     {products.map((product) => (
       <ProductCard
   key={product.id}
@@ -85,6 +117,7 @@ async function handleDelete(id: string) {
   currency={currency}
   onEdit={() => router.push(`/products/${product.id}/edit`)}
   onDelete={() => handleDelete(product.id)}
+  deleting={deleting}
 />
     ))}
   </div>

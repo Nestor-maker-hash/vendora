@@ -54,7 +54,47 @@ export default function StorefrontSettings() {
   }
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="min-w-0 space-y-4 sm:space-y-6">
+        {/* Store Logo skeleton */}
+        <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+          <div className="mb-4 h-6 w-28 animate-pulse rounded bg-gray-200 sm:mb-6" />
+
+          <div className="mb-3 h-20 w-20 animate-pulse rounded-full bg-gray-100 sm:mb-4 sm:h-24 sm:w-24" />
+
+          <div className="h-10 w-full max-w-full animate-pulse rounded-xl bg-gray-100" />
+        </div>
+
+        {/* Store Information skeleton */}
+        <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+          <div className="mb-4 h-6 w-40 animate-pulse rounded bg-gray-200 sm:mb-6" />
+
+          <div className="space-y-4 sm:space-y-5">
+            <div>
+              <div className="mb-2 h-4 w-24 animate-pulse rounded bg-gray-100" />
+              <div className="h-11 w-full animate-pulse rounded-xl bg-gray-100" />
+            </div>
+
+            <div>
+              <div className="mb-2 h-4 w-20 animate-pulse rounded bg-gray-100" />
+              <div className="h-11 w-full animate-pulse rounded-xl bg-gray-100" />
+            </div>
+
+            <div>
+              <div className="mb-2 h-4 w-28 animate-pulse rounded bg-gray-100" />
+              <div className="h-24 w-full animate-pulse rounded-xl bg-gray-100" />
+            </div>
+
+            <div>
+              <div className="mb-2 h-4 w-24 animate-pulse rounded bg-gray-100" />
+              <div className="h-11 w-full animate-pulse rounded-xl bg-gray-100" />
+            </div>
+
+            <div className="h-11 w-40 animate-pulse rounded-xl bg-gray-200" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!business) {
@@ -66,10 +106,10 @@ export default function StorefrontSettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-4 sm:space-y-6">
       {/* Store Logo */}
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="mb-6 text-xl font-semibold">
+      <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+        <h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">
           Store Logo
         </h2>
 
@@ -77,13 +117,14 @@ export default function StorefrontSettings() {
           <img
             src={logoUrl}
             alt="Logo"
-            className="mb-4 h-24 w-24 rounded-full object-cover"
+            className="mb-3 h-20 w-20 rounded-full object-cover sm:mb-4 sm:h-24 sm:w-24"
           />
         )}
 
         <input
           type="file"
           accept="image/*"
+          className="block max-w-full text-sm"
           disabled={saving}
           onChange={async (e) => {
             const file = e.target.files?.[0];
@@ -108,8 +149,8 @@ export default function StorefrontSettings() {
       </div>
 
       {/* Store Banner */}
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="mb-6 text-xl font-semibold">
+      <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+        <h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">
           Store Banner
         </h2>
 
@@ -117,13 +158,14 @@ export default function StorefrontSettings() {
           <img
             src={bannerUrl}
             alt="Banner"
-            className="mb-4 h-40 w-full rounded-xl object-cover"
+            className="mb-3 h-32 w-full max-w-full rounded-xl object-cover sm:mb-4 sm:h-40"
           />
         )}
 
         <input
           type="file"
           accept="image/*"
+          className="block max-w-full text-sm"
           disabled={saving}
           onChange={async (e) => {
             const file = e.target.files?.[0];
@@ -148,8 +190,8 @@ export default function StorefrontSettings() {
       </div>
 
       {/* Business Information */}
-      <div className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="mb-6 text-xl font-semibold">
+      <div className="min-w-0 rounded-xl border bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6">
+        <h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">
           Business Information
         </h2>
 
@@ -162,7 +204,7 @@ export default function StorefrontSettings() {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full rounded-xl border p-3"
+              className="block w-full min-w-0 rounded-xl border p-2.5 text-sm sm:p-3 sm:text-base"
               disabled={saving}
             />
           </div>
@@ -175,7 +217,7 @@ export default function StorefrontSettings() {
             <input
               value={slug}
               onChange={(e) => setSlug(e.target.value)}
-              className="w-full rounded-xl border p-3"
+              className="block w-full min-w-0 rounded-xl border p-2.5 text-sm sm:p-3 sm:text-base"
               disabled={saving}
             />
           </div>
@@ -189,7 +231,7 @@ export default function StorefrontSettings() {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="2348012345678"
-              className="w-full rounded-xl border p-3"
+              className="block w-full min-w-0 rounded-xl border p-2.5 text-sm sm:p-3 sm:text-base"
               disabled={saving}
             />
 
@@ -210,7 +252,7 @@ export default function StorefrontSettings() {
               onChange={(e) =>
                 setDescription(e.target.value)
               }
-              className="w-full rounded-xl border p-3"
+              className="block w-full min-w-0 rounded-xl border p-2.5 text-sm sm:p-3 sm:text-base"
               disabled={saving}
             />
           </div>
@@ -218,7 +260,7 @@ export default function StorefrontSettings() {
           <button
             onClick={handleSave}
             disabled={saving}
-            className="rounded-xl bg-emerald-600 px-6 py-3 font-medium text-white transition-opacity hover:bg-emerald-700 disabled:opacity-50"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white sm:w-auto sm:rounded-xl sm:px-6 sm:py-3 sm:text-base transition-opacity hover:bg-emerald-700 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save Storefront"}
           </button>

@@ -1,0 +1,34 @@
+# Vercel
+.vercel/
+
+# Environment variables
+.env*
+
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Development artifacts
+*.bak*
+*.backup
+*.backup_*
+*.pyc
+__pycache__/
+
+# Local scripts / temporary files
+*.py
+12.0.2
+PY
+processing
+create_order_atomic
+v_code
+v_reference
+
+# Test routes
+app/api/search-test/
+
+# Test routes
+/frontend/app/api/search-test/

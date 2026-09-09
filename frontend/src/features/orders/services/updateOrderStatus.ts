@@ -22,4 +22,9 @@ export async function updateOrderStatus(
       result.message ?? "Failed to update order status."
     );
   }
+
+  return {
+    notificationSent:
+      result.notificationSent !== false,
+  };
 }
