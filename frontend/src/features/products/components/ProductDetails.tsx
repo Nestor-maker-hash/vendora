@@ -62,7 +62,7 @@ export default function ProductDetails({
 
     setTimeout(() => {
       setShowToast(false);
-    }, 5000);
+    }, 3000);
   }
 
   return (
