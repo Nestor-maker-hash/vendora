@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
-import { getPostOnboardingStatus } from "@/src/features/onboarding/services/getPostOnboardingStatus";
+import { getPostOnboardingStatusServer } from "@/src/features/onboarding/services/getPostOnboardingStatusServer";
 
 export default async function OnboardingSetupPage() {
-  const status = await getPostOnboardingStatus();
+  const status = await getPostOnboardingStatusServer();
 
   if (!status.productReady) {
     redirect("/products/new?setup=true");
