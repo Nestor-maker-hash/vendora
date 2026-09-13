@@ -86,6 +86,18 @@ Create the required `.env.local` values from `frontend/.env.example` before runn
 
 Vendora is evolving from a merchant commerce operating system into a marketplace connecting African businesses.
 
+## License
+
+Vendora is source-available for learning, evaluation, and personal/non-commercial experimentation.
+
+The source code may be viewed, studied, and modified for personal or educational purposes. Commercial use, commercial redistribution, creation of competing commercial products, and offering Vendora or derivative works as a commercial hosted/SaaS service require prior written permission.
+
+Vendora's production infrastructure, customer data, credentials, trademarks, branding, and other proprietary assets are not included in this permission.
+
+For commercial licensing inquiries, please contact the project owner.
+
+See [`LICENSE`](./LICENSE) for the complete terms.
+
 ## Repository
 
-Vendora is a private commercial project under active development.
+Vendora is publicly available for source viewing and development, while its commercial use remains subject to the terms in the `LICENSE` file.
