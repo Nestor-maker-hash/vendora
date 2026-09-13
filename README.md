@@ -1,10 +1,10 @@
 # Vendora
 
-Vendora is a commerce operating system for African small businesses.
+Vendora is a commerce operating system for businesses.
 
 ## Vision
 
-Help African merchants sell more, manage customers, and grow their businesses through one platform.
+Help  merchants sell more, manage customers, and grow their businesses through one platform.
 
 ## Tech Stack
 
@@ -16,4 +16,4 @@ Help African merchants sell more, manage customers, and grow their businesses th
 
 ## Status
 
-🚧 Under active development.
+🚧 Under active development.......
