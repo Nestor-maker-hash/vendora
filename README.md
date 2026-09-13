@@ -76,7 +76,7 @@ cd vendora/frontend
 npm install
 ```
 
-Create the required `.env.local` values from `.env.example` before running the application.
+Create the required `.env.local` values from `frontend/.env.example` before running the application.
 
 **Never commit `.env.local`, API keys, service-role keys, payment secrets, or other credentials.**
 
