@@ -82,7 +82,7 @@ export default async function ProductPage({
         storeHref={`/store/${slug}`}
       />
 
-      <main className="min-h-screen bg-gray-50 pb-[calc(6rem+env(safe-area-inset-bottom))] lg:pb-0">
+      <main className="min-h-screen bg-gray-50 pb-32 lg:pb-0">
         <div className="mx-auto max-w-7xl p-4 sm:p-6">
           <Link
             href={`/store/${slug}`}
