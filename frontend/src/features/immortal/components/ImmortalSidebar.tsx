@@ -10,6 +10,7 @@ import {
   Users,
   CreditCard,
   Bell,
+  MessageSquare,
   Radio,
   Smartphone,
   AlertTriangle,
@@ -52,6 +53,11 @@ const navigation = [
     name: "Notifications",
     href: "/immortal/notifications",
     icon: Bell,
+  },
+  {
+    name: "Messages",
+    href: "/immortal/messages",
+    icon: MessageSquare,
   },
   {
     name: "Broadcast",
