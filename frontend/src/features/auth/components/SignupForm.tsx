@@ -400,6 +400,24 @@ if (showVerificationScreen) {
 
             </p>
 
+            <p className="text-center text-xs text-gray-400">
+              By continuing, you agree to our{" "}
+              <Link
+                href="/privacy"
+                className="underline hover:text-gray-600"
+              >
+                Privacy Policy
+              </Link>{" "}
+              and{" "}
+              <Link
+                href="/terms"
+                className="underline hover:text-gray-600"
+              >
+                Terms of Service
+              </Link>
+              .
+            </p>
+
           </div>
 
         </div>
