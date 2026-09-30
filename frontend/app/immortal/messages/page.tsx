@@ -9,6 +9,7 @@ import {
 import { getImmortalWhatsAppMessages } from "@/src/features/immortal/services/getImmortalWhatsAppMessages";
 import { getImmortalWhatsAppMerchants } from "@/src/features/immortal/services/getImmortalWhatsAppMerchants";
 import { getImmortalAccess } from "@/src/features/immortal/services/getImmortalAccess";
+import MessagesRealtime from "./MessagesRealtime";
 
 function formatTime(value: string | null) {
   if (!value) {
@@ -31,6 +32,8 @@ function displayName(
 export default async function ImmortalMessagesPage() {
   await getImmortalAccess();
 
+  // Revalidate the server-rendered inbox when a new WhatsApp event arrives.
+
   const [
     conversations,
     merchants,
@@ -40,6 +43,8 @@ export default async function ImmortalMessagesPage() {
   ]);
 
   return (
+    <>
+      <MessagesRealtime />
     <div className="p-4 md:p-6 lg:p-8">
       <div className="mx-auto max-w-[1600px]">
         <div className="mb-8">
@@ -240,5 +245,6 @@ export default async function ImmortalMessagesPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

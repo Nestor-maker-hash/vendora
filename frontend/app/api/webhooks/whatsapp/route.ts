@@ -428,6 +428,16 @@ export async function POST(request: Request) {
               `Failed to update unread count: ${unreadError.message}`
             );
           }
+
+          const { error: eventError } = await supabaseServer
+            .from("immortal_whatsapp_events")
+            .insert({});
+
+          if (eventError) {
+            throw new Error(
+              `Failed to create WhatsApp realtime event: ${eventError.message}`
+            );
+          }
         }
       }
     }
