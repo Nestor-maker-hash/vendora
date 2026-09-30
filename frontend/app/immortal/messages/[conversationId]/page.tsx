@@ -13,6 +13,7 @@ import { getImmortalAccess } from "@/src/features/immortal/services/getImmortalA
 import { getImmortalWhatsAppConversation } from "@/src/features/immortal/services/getImmortalWhatsAppConversation";
 import { markImmortalWhatsAppConversationRead } from "@/src/features/immortal/services/markImmortalWhatsAppConversationRead";
 import MessageComposer from "./MessageComposer";
+import ConversationRealtime from "./ConversationRealtime";
 
 function formatTime(value: string) {
   return new Date(value).toLocaleString([], {
@@ -187,7 +188,9 @@ export default async function ImmortalWhatsAppConversationPage({
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] flex-col">
+    <>
+      <ConversationRealtime />
+      <div className="flex h-[calc(100vh-4rem)] flex-col">
       {/* Header */}
       <header className="flex shrink-0 items-center gap-4 border-b border-slate-800 bg-slate-950/80 px-4 py-4 backdrop-blur md:px-6">
         <Link
@@ -293,6 +296,7 @@ export default async function ImmortalWhatsAppConversationPage({
           conversationId={conversationId}
         />
       </footer>
-    </div>
+      </div>
+    </>
   );
 }
