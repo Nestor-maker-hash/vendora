@@ -4,6 +4,7 @@ import { useAnalytics } from "../hooks/useAnalytics";
 import { formatCurrency } from "@/src/utils/formatCurrency";
 import RevenueChart from "./RevenueChart";
 import TopProducts from "./TopProducts";
+import StorefrontVisitors from "./StorefrontVisitors";
 import { useBusiness } from "@/src/features/business/hooks/useBusiness";
 
 function MetricSkeleton() {
@@ -141,6 +142,13 @@ export default function AnalyticsOverview() {
           </div>
         ))}
       </div>
+
+      <StorefrontVisitors
+        visitors={analytics.visitors}
+        visits={analytics.visits}
+        weeklyAverage={analytics.weeklyAverage}
+        previousWeeklyAverage={analytics.previousWeeklyAverage}
+      />
 
       <RevenueChart
         data={analytics.revenueHistory}

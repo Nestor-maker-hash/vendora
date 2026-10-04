@@ -146,7 +146,7 @@ export default function ImmortalSidebar() {
         </nav>
       </div>
 
-      <div className="mt-auto border-t border-slate-800 p-4">
+      <div className="mt-8 border-t border-slate-800 p-4">
         <button
           onClick={signOut}
           className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm text-slate-500 transition hover:bg-red-500/10 hover:text-red-400"
