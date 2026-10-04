@@ -3,6 +3,7 @@ import RecentOrders from "@/src/components/dashboard/RecentOrders";
 import DashboardLayout from "@/src/components/layout/DashboardLayout";
 import StoreLinkCard from "@/src/features/business/components/StoreLinkCard";
 import DashboardStats from "@/src/components/dashboard/DashboardStats";
+import DashboardVisitorIndicator from "@/src/components/dashboard/DashboardVisitorIndicator";
 import PostOnboardingSetup from "@/src/features/onboarding/components/PostOnboardingSetup";
 import StoreReadyPrompt from "@/src/features/onboarding/components/StoreReadyPrompt";
 import Link from "next/link";
@@ -18,9 +19,13 @@ export default function DashboardPage() {
           </h1>
 
           <div className="mt-1 flex items-center justify-between gap-3 sm:mt-2">
-            <p className="text-sm text-gray-600 sm:text-base">
-              Welcome to Vendora.
-            </p>
+            <div className="flex min-w-0 items-center gap-2">
+              <p className="truncate text-sm text-gray-600 sm:text-base">
+                Welcome to Vendora.
+              </p>
+
+              <DashboardVisitorIndicator />
+            </div>
 
             <Link
               href="/products/new"
