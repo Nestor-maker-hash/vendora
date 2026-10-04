@@ -1,4 +1,5 @@
 import { supabaseServer } from "@/src/lib/supabaseServer";
+import { getVisitorAnalytics } from "./getVisitorAnalytics";
 
 export async function getImmortalOverview() {
   const [
@@ -8,6 +9,7 @@ export async function getImmortalOverview() {
     subscriptionsResult,
     notificationsResult,
     pushSubscriptionsResult,
+    visitorAnalytics,
   ] = await Promise.all([
     supabaseServer
       .from("businesses")
@@ -38,6 +40,8 @@ export async function getImmortalOverview() {
       .select(
         "id, business_id, platform, is_active, last_used_at"
       ),
+
+    getVisitorAnalytics(),
   ]);
 
   if (businessesResult.error) {
@@ -195,5 +199,6 @@ export async function getImmortalOverview() {
     lowStockProducts,
 
     merchantsNeedingSetup,
+    visitorAnalytics,
   };
 }

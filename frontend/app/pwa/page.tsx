@@ -24,6 +24,18 @@ export default async function PWALauncher() {
   const lastContext =
     cookieStore.get("vendora:last-context")?.value;
 
+  if (lastContext === "immortal") {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role === "super_admin") {
+      redirect("/immortal");
+    }
+  }
+
   if (lastContext === "business") {
     redirect("/dashboard");
   }

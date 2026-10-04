@@ -79,6 +79,13 @@ export async function sendWhatsAppTemplate(
     throw new Error("Invalid recipient phone number.");
   }
 
+  console.log("WHATSAPP TEMPLATE PAYLOAD:", JSON.stringify({
+    to,
+    template: data.template,
+    variables: data.variables,
+    buttonVariables: data.buttonVariables,
+  }, null, 2));
+
   const response = await fetch(
     `https://graph.facebook.com/v23.0/${phoneNumberId}/messages`,
     {

@@ -1,4 +1,4 @@
-export type PWAContext = "marketplace" | "business";
+export type PWAContext = "marketplace" | "business" | "immortal";
 
 const PWA_CONTEXT_COOKIE = "vendora:last-context";
 
@@ -30,7 +30,13 @@ export function getPWAContext(): PWAContext {
 
   const value = cookie?.split("=")[1];
 
-  return value === "business"
-    ? "business"
-    : "marketplace";
+  if (value === "business") {
+    return "business";
+  }
+
+  if (value === "immortal") {
+    return "immortal";
+  }
+
+  return "marketplace";
 }

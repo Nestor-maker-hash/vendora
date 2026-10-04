@@ -9,6 +9,7 @@ import {
   Smartphone,
   Store,
   Users,
+  Eye,
 } from "lucide-react";
 import { getImmortalAccess } from "@/src/features/immortal/services/getImmortalAccess";
 import { getImmortalOverview } from "@/src/features/immortal/services/getImmortalOverview";
@@ -92,6 +93,17 @@ export default async function ImmortalPage() {
               {user.email}
             </p>
           </div>
+        </div>
+
+        <div className="mb-5 flex items-center gap-2 text-xs text-slate-500">
+          <Eye size={14} className="shrink-0" />
+          <span>
+            {formatNumber(overview.visitorAnalytics.visitors)} marketplace visitors
+          </span>
+          <span className="text-slate-700">•</span>
+          <span>
+            {overview.visitorAnalytics.weeklyAverage.toLocaleString()} visits/week
+          </span>
         </div>
 
         <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

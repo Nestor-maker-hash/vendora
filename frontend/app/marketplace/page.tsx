@@ -6,6 +6,7 @@ import { getMarketplace } from "@/src/features/marketplace/services/getMarketpla
 import { searchMarketplace } from "@/src/features/marketplace/services/searchMarketplace";
 import { Package, Store } from "lucide-react";
 import Link from "next/link";
+import VisitorTracker from "@/src/features/analytics/components/VisitorTracker";
 
 interface MarketplacePageProps {
   searchParams: Promise<{
@@ -34,6 +35,7 @@ export default async function MarketplacePage({
 
   return (
     <>
+      <VisitorTracker surface="marketplace" />
       <MarketplaceNavbar />
 
       <main className="min-h-screen bg-slate-50 pb-24 text-slate-900 lg:pb-0">

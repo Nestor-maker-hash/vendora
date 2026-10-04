@@ -4,6 +4,7 @@ import { useState } from "react";
 import StoreNavbar from "./StoreNavbar";
 import StoreProducts from "./StoreProducts";
 import { Product } from "@/src/features/products/types/product";
+import VisitorTracker from "@/src/features/analytics/components/VisitorTracker";
 
 interface Business {
   id: string;
@@ -39,6 +40,10 @@ export default function StorePageClient({
 
   return (
     <>
+      <VisitorTracker
+        surface="storefront"
+        businessId={business.id}
+      />
       <StoreNavbar
 	business={business}
         storeName={business.name}

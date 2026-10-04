@@ -1,8 +1,10 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import ImmortalSidebar from "@/src/features/immortal/components/ImmortalSidebar";
 import ImmortalTopbar from "@/src/features/immortal/components/ImmortalTopbar";
+import ImmortalBottomNav from "@/src/features/immortal/components/ImmortalBottomNav";
+import { setPWAContext } from "@/src/lib/pwa-context";
 
 interface ImmortalLayoutProps {
   children: ReactNode;
@@ -12,6 +14,14 @@ export default function ImmortalLayout({
   children,
 }: ImmortalLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    setPWAContext("immortal");
+  }, []);
+
+  useEffect(() => {
+    setPWAContext("immortal");
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-white">
@@ -41,9 +51,11 @@ export default function ImmortalLayout({
             }
           />
 
-          <main className="min-w-0 flex-1">
+          <main className="min-w-0 flex-1 pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
             {children}
           </main>
+
+          <ImmortalBottomNav />
         </div>
       </div>
     </div>

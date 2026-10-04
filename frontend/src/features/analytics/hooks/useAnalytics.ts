@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { getAnalytics } from "../services/getAnalytics";
 import { getTopProducts } from "../services/getTopProducts";
+import { getVisitorAnalytics } from "../services/getVisitorAnalytics";
+import { getCurrentBusiness } from "@/src/features/business/services/getCurrentBusiness";
 
 const initialAnalytics = {
   revenue: 0,
@@ -13,6 +15,10 @@ const initialAnalytics = {
   pendingOrders: 0,
   averageOrderValue: 0,
   lowStockProducts: 0,
+  visitors: 0,
+  visits: 0,
+  weeklyAverage: 0,
+  previousWeeklyAverage: 0,
   revenueHistory: [] as {
     date: string;
     revenue: number;
@@ -42,16 +48,23 @@ export function useAnalytics() {
         setLoading(true);
         setError(null);
 
-        const [summary, topProducts] =
-          await Promise.all([
-            getAnalytics(),
-            getTopProducts(),
-          ]);
+        const business = await getCurrentBusiness();
+
+        const [
+          summary,
+          topProducts,
+          visitorAnalytics,
+        ] = await Promise.all([
+          getAnalytics(),
+          getTopProducts(),
+          getVisitorAnalytics(business.id),
+        ]);
 
         if (!active) return;
 
         setAnalytics({
           ...summary,
+          ...visitorAnalytics,
           topProducts,
         });
       } catch (err) {
