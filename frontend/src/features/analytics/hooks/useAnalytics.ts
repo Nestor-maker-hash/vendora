@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import { getAnalytics } from "../services/getAnalytics";
 import { getTopProducts } from "../services/getTopProducts";
-import { getVisitorAnalytics } from "../services/getVisitorAnalytics";
-import { getCurrentBusiness } from "@/src/features/business/services/getCurrentBusiness";
 
 const initialAnalytics = {
   revenue: 0,
@@ -48,17 +46,32 @@ export function useAnalytics() {
         setLoading(true);
         setError(null);
 
-        const business = await getCurrentBusiness();
-
         const [
           summary,
           topProducts,
-          visitorAnalytics,
+          visitorResponse,
         ] = await Promise.all([
           getAnalytics(),
           getTopProducts(),
-          getVisitorAnalytics(business.id),
+          fetch("/api/analytics/visitors", {
+            method: "GET",
+            cache: "no-store",
+          }),
         ]);
+
+        if (!visitorResponse.ok) {
+          throw new Error(
+            "Failed to load visitor analytics."
+          );
+        }
+
+        const visitorAnalytics =
+          (await visitorResponse.json()) as {
+            visitors: number;
+            visits: number;
+            weeklyAverage: number;
+            previousWeeklyAverage: number;
+          };
 
         if (!active) return;
 

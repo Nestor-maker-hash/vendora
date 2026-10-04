@@ -1,32 +1,48 @@
 "use client";
 
 import Link from "next/link";
-import { Eye, ChevronRight } from "lucide-react";
+import { ChevronRight, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useBusiness } from "@/src/features/business/hooks/useBusiness";
-import { getVisitorAnalytics } from "@/src/features/analytics/services/getVisitorAnalytics";
 
 export default function DashboardVisitorIndicator() {
-  const { business, loading: businessLoading } = useBusiness();
-  const [visitors, setVisitors] = useState<number | null>(null);
+  const [visitors, setVisitors] =
+    useState<number | null>(null);
 
   useEffect(() => {
-    if (businessLoading || !business?.id) {
-      return;
-    }
-
     let cancelled = false;
-
-    const businessId = business.id;
 
     async function loadVisitors() {
       try {
-        const data = await getVisitorAnalytics(businessId);
+        const response = await fetch(
+          "/api/analytics/visitors",
+          {
+            method: "GET",
+            cache: "no-store",
+          }
+        );
 
-        if (!cancelled) {
+        if (!response.ok) {
+          throw new Error(
+            "Failed to load visitor analytics."
+          );
+        }
+
+        const data = (await response.json()) as {
+          visitors?: unknown;
+        };
+
+        if (
+          !cancelled &&
+          typeof data.visitors === "number"
+        ) {
           setVisitors(data.visitors);
         }
-      } catch {
+      } catch (error) {
+        console.error(
+          "Dashboard visitor indicator error:",
+          error
+        );
+
         if (!cancelled) {
           setVisitors(null);
         }
@@ -38,7 +54,7 @@ export default function DashboardVisitorIndicator() {
     return () => {
       cancelled = true;
     };
-  }, [business?.id, businessLoading]);
+  }, []);
 
   if (visitors === null) {
     return null;
