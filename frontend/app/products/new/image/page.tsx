@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { Suspense } from "react";
 
-export default function ProductImagePage() {
+function ProductImageContent() {
   const searchParams = useSearchParams();
   const src = searchParams.get("src");
   const requestedBack = searchParams.get("back");
@@ -54,5 +55,19 @@ export default function ProductImagePage() {
         />
       </div>
     </main>
+  );
+}
+
+export default function ProductImagePage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center bg-black text-white">
+          Loading image...
+        </main>
+      }
+    >
+      <ProductImageContent />
+    </Suspense>
   );
 }
